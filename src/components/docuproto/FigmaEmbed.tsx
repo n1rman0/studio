@@ -1,22 +1,13 @@
 
 "use client";
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { useAppContext } from './AppContextProvider';
 import { FIGMA_PROTOTYPE_URL, IOS_DOCUMENTATION } from '@/data/documentation';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const FigmaEmbed: React.FC = () => {
   const { setCurrentDocSectionById, figmaIframeRef, setIsFigmaReady, isFigmaReady } = useAppContext();
-  const localIframeRef = useRef<HTMLIFrameElement | null>(null);
-
-  // Assign local ref to context ref
-  useEffect(() => {
-    if (localIframeRef.current && figmaIframeRef) {
-      (figmaIframeRef as React.MutableRefObject<HTMLIFrameElement | null>).current = localIframeRef.current;
-    }
-  }, [figmaIframeRef]);
-
 
   useEffect(() => {
     const handleFigmaMessage = (event: MessageEvent) => {
@@ -70,7 +61,7 @@ const FigmaEmbed: React.FC = () => {
         )}
         
         <iframe
-          ref={localIframeRef}
+          ref={figmaIframeRef} // Use the ref from context directly
           id="figma-embed-iframe"
           className={`w-full h-full border-0 transition-opacity duration-300 ${isFigmaReady ? 'opacity-100' : 'opacity-0'}`}
           src={embedSrc}
