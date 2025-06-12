@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useEffect, useRef } from 'react';
@@ -30,15 +31,14 @@ const FigmaEmbed: React.FC = () => {
          console.log("Figma canvas is ready.");
       }
       
-      if (type === 'NODE_CLICK' || eventName === 'NODE_CLICK') { // Figma API sends eventName, older might send type
-        const nodeId = payload?.nodeId || event.data.nodeId; // Adapt to potential payload structures
+      if (type === 'NODE_CLICK' || eventName === 'NODE_CLICK') { 
+        const nodeId = payload?.nodeId || event.data.nodeId; 
         if (nodeId) {
           console.log('Figma node clicked:', nodeId);
           const matchedSection = IOS_DOCUMENTATION.find(section => section.figmaNodeId === nodeId);
           if (matchedSection) {
             setCurrentDocSectionById(matchedSection.id);
           } else {
-            // If no direct match, perhaps find closest or default. For now, log.
             console.log('No documentation section directly mapped to Figma node ID:', nodeId);
           }
         }
@@ -46,13 +46,6 @@ const FigmaEmbed: React.FC = () => {
     };
 
     window.addEventListener('message', handleFigmaMessage);
-
-    // Attempt to signal readiness to Figma embed if it's already loaded
-    // This is a bit of a guess, official API for this is via 'CANVAS_READY'
-    if (localIframeRef.current?.contentWindow) {
-        localIframeRef.current.contentWindow.postMessage({ type: "FIGMA_EMBED_CLIENT_READY" }, "https://www.figma.com");
-    }
-
 
     return () => {
       window.removeEventListener('message', handleFigmaMessage);
@@ -63,26 +56,29 @@ const FigmaEmbed: React.FC = () => {
 
   return (
     <div className="w-full h-full flex flex-col bg-muted/50 rounded-lg shadow-inner overflow-hidden">
-      <div className="p-3 border-b border-border bg-card">
+      <div className="p-3 border-b border-border bg-card shrink-0">
         <h2 className="font-headline text-lg text-foreground">Interactive Prototype</h2>
       </div>
-      {!isFigmaReady && (
-        <div className="flex-grow flex items-center justify-center">
-          <div className="text-center">
-            <Skeleton className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/20" />
-            <p className="text-muted-foreground">Loading Figma Prototype...</p>
+      <div className="flex-grow relative"> {/* Container for iframe and loader */}
+        {!isFigmaReady && (
+          <div className="absolute inset-0 flex items-center justify-center bg-muted/50 z-10"> {/* Loader covers this div */}
+            <div className="text-center p-4">
+              <Skeleton className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/20" />
+              <p className="text-muted-foreground">Loading Figma Prototype...</p>
+            </div>
           </div>
-        </div>
-      )}
-      <iframe
-        ref={localIframeRef}
-        id="figma-embed-iframe"
-        className={`w-full flex-grow border-0 ${isFigmaReady ? 'opacity-100' : 'opacity-0 h-0'}`}
-        src={embedSrc}
-        allowFullScreen
-        title="Figma Prototype"
-        sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
-      ></iframe>
+        )}
+        
+        <iframe
+          ref={localIframeRef}
+          id="figma-embed-iframe"
+          className={`w-full h-full border-0 transition-opacity duration-300 ${isFigmaReady ? 'opacity-100' : 'opacity-0'}`}
+          src={embedSrc}
+          allowFullScreen
+          title="Figma Prototype"
+          sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+        ></iframe>
+      </div>
     </div>
   );
 };
