@@ -1,3 +1,4 @@
+
 // This is an AI-powered code! Check carefully before using.
 'use server';
 
@@ -46,11 +47,24 @@ export type SuggestDocumentationSnippetsOutput = z.infer<
 export async function suggestDocumentationSnippets(
   input: SuggestDocumentationSnippetsInput
 ): Promise<SuggestDocumentationSnippetsOutput> {
-  return suggestDocumentationSnippetsFlow(input);
+  // Since src/ai/genkit.ts was modified to have plugins: [],
+  // any attempt to call an LLM through Genkit will fail.
+  // We bypass the Genkit flow call to prevent server errors.
+  // The frontend will gracefully handle empty suggestions.
+  console.warn(
+    'Contextual AI suggestions are currently bypassed as no AI model provider (plugin) is configured in src/ai/genkit.ts. Returning empty suggestions.'
+  );
+  return { suggestedSnippets: [] };
+  
+  // Original call to the flow, which would be used if AI plugins were configured:
+  // return suggestDocumentationSnippetsFlow(input);
 }
+
+// The prompt and flow definitions below are kept for potential future use if AI capabilities are re-enabled.
 
 const prompt = ai.definePrompt({
   name: 'suggestDocumentationSnippetsPrompt',
+  // A model would typically be specified here if a plugin was active, e.g., model: 'googleai/gemini-pro',
   input: {schema: SuggestDocumentationSnippetsInputSchema},
   output: {schema: SuggestDocumentationSnippetsOutputSchema},
   prompt: `You are an AI assistant that suggests relevant documentation snippets based on the current section, user query, and interaction history.
