@@ -9,30 +9,40 @@ const FigmaEmbed: React.FC = () => {
   const { setCurrentDocSectionById, figmaIframeRef, setIsFigmaReady, isFigmaReady } = useAppContext();
 
   useEffect(() => {
+    // Diagnostic: Check if Figma API script loaded
+    const timer = setTimeout(() => {
+      if (typeof (window as any).figma === 'undefined') {
+        console.warn("Figma Embed API (window.figma) not detected after 3 seconds. This could be why CANVAS_READY isn't firing. Ensure the script from https://www.figma.com/embed_api/1.0.0 is loading correctly (check Network tab and console for errors related to this script).");
+      } else {
+        console.log("Figma Embed API (window.figma) IS DETECTED.");
+      }
+    }, 3000);
+
     const handleFigmaMessage = (event: MessageEvent) => {
       if (event.origin !== 'https://www.figma.com') {
         return;
       }
       
-      console.log('Figma message received:', event.data);
+      const messageData = event.data; 
+      console.log('Figma message received (raw):', messageData); 
 
-      if (!event.data || typeof event.data !== 'object') {
-        console.warn('Received non-object data from Figma:', event.data);
-        return;
+      if (typeof messageData === 'object' && messageData !== null && messageData.type) {
+        console.log(`Figma message type received: ${messageData.type}`);
+      } else if (typeof messageData === 'string') {
+        console.log('Figma message received (string):', messageData);
+      } else {
+        console.log('Figma message received (unknown format):', messageData);
       }
-      
-      const messageData = event.data; // Access event.data directly
 
-      // Check for CANVAS_READY specifically using type
-      if (messageData.type === 'CANVAS_READY') {
+      // Explicitly check for CANVAS_READY as per Figma Embed API
+      if (typeof messageData === 'object' && messageData !== null && messageData.type === 'CANVAS_READY') {
          setIsFigmaReady(true);
-         console.log("Figma canvas is ready.");
+         console.log("Figma canvas is ready. Overlay should disappear now.");
       }
       
       // Handle NODE_CLICK for interactivity
-      // Ensure payload and nodeId are correctly accessed based on the actual message structure logged by console.log
-      if (messageData.type === 'NODE_CLICK') { 
-        const nodeId = messageData.payload?.nodeId || messageData.nodeId; // Check both common structures
+      if (typeof messageData === 'object' && messageData !== null && messageData.type === 'NODE_CLICK') { 
+        const nodeId = messageData.payload?.nodeId || messageData.nodeId; 
         if (nodeId) {
           console.log('Figma node clicked:', nodeId);
           const matchedSection = IOS_DOCUMENTATION.find(section => section.figmaNodeId === nodeId);
@@ -49,15 +59,12 @@ const FigmaEmbed: React.FC = () => {
 
     window.addEventListener('message', handleFigmaMessage);
 
-    return () => {
+    return () => {      
       window.removeEventListener('message', handleFigmaMessage);
+      clearTimeout(timer);
     };
-    // Dependencies: if setIsFigmaReady or setCurrentDocSectionById are guaranteed to be stable,
-    // they can be omitted. isFigmaReady is included if any logic within the effect depends on its current value
-    // for re-evaluation beyond just the event listener setup.
-    // For simple event listener setup/teardown, often an empty array or stable setters are sufficient.
-    // However, given its prior inclusion, and potential for complex interactions, keeping them for now.
-  }, [setCurrentDocSectionById, setIsFigmaReady, isFigmaReady]);
+    // Stable dependencies: setIsFigmaReady is a state setter, setCurrentDocSectionById is memoized in context.
+  }, [setIsFigmaReady, setCurrentDocSectionById]); 
 
   const embedSrc = `https://www.figma.com/embed?embed_host=docuproto&url=${encodeURIComponent(FIGMA_PROTOTYPE_URL)}`;
 
@@ -68,14 +75,14 @@ const FigmaEmbed: React.FC = () => {
       </div>
       <div className="flex-grow relative">
         {!isFigmaReady && (
-            <div className="absolute inset-0 flex items-center justify-center bg-muted/30 backdrop-blur-sm z-10">
-                 <p className="text-muted-foreground p-4 text-center bg-background/80 rounded-md shadow-md">Attempting to load Figma Prototype...<br/>Check console for 'Figma canvas is ready.' message.</p>
+            <div className="absolute inset-0 flex items-center justify-center bg-muted/10 backdrop-blur-xs z-10 pointer-events-none">
+                 <p className="text-muted-foreground p-4 text-center bg-background/80 rounded-md shadow-md">Attempting to load Figma Prototype...<br/>Check console for messages from Figma.</p>
             </div>
         )}
         <iframe
-          ref={figmaIframeRef}
+          ref={figmaIframeRef} 
           id="figma-embed-iframe"
-          className={`w-full h-full border-0 transition-opacity duration-300 ${isFigmaReady ? 'opacity-100' : 'opacity-70'}`}
+          className={`w-full h-full border-0 opacity-100`} // Always fully opaque for debugging visibility
           src={embedSrc}
           allowFullScreen
           title="Figma Prototype"
