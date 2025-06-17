@@ -1,53 +1,32 @@
-
 "use client";
 
 import React, { useEffect } from 'react';
 import { useAppContext } from './AppContextProvider';
-import { FIGMA_PROTOTYPE_URL, IOS_DOCUMENTATION } from '@/data/documentation';
+import { FIGMA_FILE_KEY, FIGMA_CLIENT_ID, IOS_DOCUMENTATION } from '@/data/documentation';
 
 const FigmaEmbed: React.FC = () => {
-  const { setCurrentDocSectionById, figmaIframeRef, setIsFigmaReady, isFigmaReady } = useAppContext();
+  const { setCurrentDocSectionById, figmaIframeRef, setIsFigmaReady, isFigmaReady, addInteraction } = useAppContext();
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (typeof (window as any).figma === 'undefined') {
-        console.warn("Figma Embed API (window.figma) not detected after 3 seconds. This could be why CANVAS_READY isn't firing. Ensure the script from https://www.figma.com/embed_api/1.0.0 is loading correctly (check Network tab and console for errors related to this script).");
-      } else {
-        console.log("Figma Embed API (window.figma) IS DETECTED.");
-      }
-    }, 3000);
+    const figmaOrigin = "https://www.figma.com";
 
     const handleFigmaMessage = (event: MessageEvent) => {
-      if (event.origin !== 'https://www.figma.com') {
-        return;
-      }
-      
-      // Log all raw message data from Figma
-      console.log('Figma message received (raw):', event.data); 
+      if (event.origin !== figmaOrigin) return;
 
-      // Attempt to parse and log structured messages
-      let messageData = event.data;
-      if (typeof event.data === 'string') {
-        try {
-          messageData = JSON.parse(event.data);
-        } catch (e) {
-          // Not JSON, proceed with string
-          console.log('Figma message received (string, not JSON):', event.data);
-        }
-      }
-      
-      if (typeof messageData === 'object' && messageData !== null && messageData.type) {
-        console.log(`Figma message type received: ${messageData.type}`, 'Payload:', messageData.payload || messageData);
+      const { data } = event;
+      if (!data) return;
 
-        if (messageData.type === 'CANVAS_READY') {
-           setIsFigmaReady(true);
-           console.log("Figma canvas is ready. Interactions should now be fully processed.");
-        }
-        
-        if (messageData.type === 'NODE_CLICK') { 
-          const nodeId = messageData.payload?.nodeId || messageData.nodeId; 
-          console.log('Figma NODE_CLICK detected. Node ID:', nodeId, 'Full payload:', messageData.payload || messageData);
+      console.log("Figma message received:", data);
+
+      switch (data.type) {
+        case "INITIAL_LOAD":
+          setIsFigmaReady(true);
+          addInteraction("Prototype is ready");
+          break;
+        case "PRESENTED_NODE_CHANGED":
+          const nodeId = data.data.presentedNodeId;
           if (nodeId) {
+            addInteraction(`Navigated to node: ${nodeId}`);
             const matchedSection = IOS_DOCUMENTATION.find(section => section.figmaNodeId === nodeId);
             if (matchedSection) {
               console.log('Matched documentation section:', matchedSection.title);
@@ -55,45 +34,48 @@ const FigmaEmbed: React.FC = () => {
             } else {
               console.log('No documentation section directly mapped to Figma node ID:', nodeId);
             }
-          } else {
-            console.warn('NODE_CLICK event received without a nodeId in payload:', messageData);
           }
-        }
-      } else if (typeof messageData === 'string') {
-         // Already logged if not JSON, if it was JSON it's handled above
-      } else {
-        console.log('Figma message received (unknown/unstructured format):', messageData);
+          break;
+        case "MOUSE_PRESS_OR_RELEASE":
+          addInteraction(`Mouse press/release on node: ${data.data.targetNodeId}`);
+          break;
+        case "NEW_STATE":
+          addInteraction(`Component state changed`);
+          console.log("Component state changed:", data.data);
+          break;
+        default:
+          // You can handle other event types here if needed
+          break;
       }
     };
 
     window.addEventListener('message', handleFigmaMessage);
 
-    return () => {      
+    return () => {
       window.removeEventListener('message', handleFigmaMessage);
-      clearTimeout(timer);
     };
-  }, [setIsFigmaReady, setCurrentDocSectionById]); 
+  }, [setIsFigmaReady, setCurrentDocSectionById, addInteraction]);
 
-  const embedSrc = `https://www.figma.com/embed?embed_host=docuproto&url=${encodeURIComponent(FIGMA_PROTOTYPE_URL)}`;
+  // Using the new embed.figma.com URL structure
+  const embedSrc = `https://embed.figma.com/proto/${FIGMA_FILE_KEY}?embed-host=docuproto&client-id=${FIGMA_CLIENT_ID}`;
 
   return (
     <div className="w-full h-full flex flex-col bg-muted/50 rounded-lg shadow-inner overflow-hidden">
       <div className="p-3 border-b border-border bg-card shrink-0">
         <h2 className="font-headline text-lg text-foreground">Interactive Prototype</h2>
         <p className="text-xs text-muted-foreground">
-          {isFigmaReady ? "Figma API Ready." : "Attempting to initialize Figma API..."}
+          {isFigmaReady ? "Figma API Ready." : "Initializing Figma API..."}
         </p>
       </div>
       <div className="flex-grow relative">
-        {/* Overlay removed for direct interaction debugging */}
         <iframe
-          ref={figmaIframeRef} 
-          id="figma-embed-iframe"
-          className="w-full h-full border-0 opacity-100" // Always fully opaque
+          ref={figmaIframeRef}
+          id="embed-frame"
+          className="w-full h-full border-0"
           src={embedSrc}
           allowFullScreen
           title="Figma Prototype"
-          sandbox="allow-scripts allow-same-origin allow-popups allow-forms" // Standard sandbox attributes
+          sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
         ></iframe>
       </div>
     </div>

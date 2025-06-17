@@ -8,7 +8,7 @@ interface AppContextType {
   currentDocSection: DocSection | null;
   setCurrentDocSectionById: (id: string | null) => void;
   navigateToFigmaNode: (nodeId: string) => void;
-  figmaIframeRef: React.RefObject<HTMLIFrameElement | null>;
+  figmaIframeRef: React.RefObject<HTMLIFrameElement>;
   interactionHistory: string[];
   addInteraction: (interaction: string) => void;
   isFigmaReady: boolean;
@@ -20,7 +20,7 @@ const AppContext = createContext<AppContextType | null>(null);
 export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentDocSectionId, setCurrentDocSectionIdState] = useState<string | null>(IOS_DOCUMENTATION[0]?.id || null);
   const [interactionHistory, setInteractionHistory] = useState<string[]>([]);
-  const figmaIframeRef = useRef<HTMLIFrameElement | null>(null);
+  const figmaIframeRef = useRef<HTMLIFrameElement>(null);
   const [isFigmaReady, setIsFigmaReady] = useState(false);
 
   const currentDocSection = IOS_DOCUMENTATION.find(section => section.id === currentDocSectionId) || null;
@@ -47,7 +47,10 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const navigateToFigmaNode = useCallback((nodeId: string) => {
     if (figmaIframeRef.current && figmaIframeRef.current.contentWindow && isFigmaReady) {
       figmaIframeRef.current.contentWindow.postMessage(
-        { type: 'PROTOTYPE_NAVIGATE_TO_NODE', payload: { nodeId } },
+        {
+          type: 'NAVIGATE_TO_FRAME_AND_CLOSE_OVERLAYS',
+          data: { nodeId }
+        },
         'https://www.figma.com'
       );
     } else {

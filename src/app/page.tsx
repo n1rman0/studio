@@ -2,7 +2,7 @@ import { AppContextProvider } from '@/components/docuproto/AppContextProvider';
 import FigmaEmbed from '@/components/docuproto/FigmaEmbed';
 import DocumentationDisplay from '@/components/docuproto/DocumentationDisplay';
 import NavigationMenu from '@/components/docuproto/NavigationMenu';
-import ContextualSuggestions from '@/components/docuproto/ContextualSuggestions';
+import EventDisplay from '@/components/docuproto/ContextualSuggestions';
 import {
   SidebarProvider,
   Sidebar,
@@ -41,7 +41,7 @@ export default function DocuProtoPage() {
                   <DocumentationDisplay />
                 </div>
                 <div className="shrink-0">
-                  <ContextualSuggestions />
+                  <EventDisplay />
                 </div>
               </div>
             </div>

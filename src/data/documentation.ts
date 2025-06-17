@@ -5,6 +5,7 @@ export interface DocSection {
   content: string; // Markdown content
   relatedSuggestionsQuery?: string;
   icon?: React.ElementType; // Lucide icon
+  iconName?: string;
 }
 
 // It's better to import icons where they are used to keep this file data-only
@@ -103,3 +104,10 @@ PaymentSDK.shared.applyTheme(theme)
 ];
 
 export const FIGMA_PROTOTYPE_URL = "https://www.figma.com/proto/Qy1SqTQFBGy0MbDona2oA5/Finance-Management-Mobile-App-UI-UX-Kit-for-Budget-Tracker-Financial-Prototype-Design--Community-?node-id=7113-2955&p=f&t=iSAURmcpt7d32xlC-1&scaling=min-zoom&content-scaling=fixed&page-id=7020%3A3430&starting-point-node-id=7113%3A2955";
+
+// --- New constants for Embed Kit 2.0 ---
+// Extracted from the FIGMA_PROTOTYPE_URL
+export const FIGMA_FILE_KEY = "Qy1SqTQFBGy0MbDona2oA5"; 
+
+// IMPORTANT: Replace with your actual Figma OAuth App Client ID
+export const FIGMA_CLIENT_ID = "eei95vaW5N3lSAmtqIeWnL"; 
