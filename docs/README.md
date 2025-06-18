@@ -77,7 +77,7 @@ Welcome to the comprehensive documentation package for **DocuProto**, an innovat
 - **Firebase Studio**: Hosting and deployment platform
 
 ### Advanced Features
-- **Figma Embed API 2.0**: Secure prototype integration
+- **Figma Embed Kit 2.0**: Modern prototype integration (no script dependencies)
 - **Google Genkit**: AI flow orchestration and suggestions
 - **Radix UI**: Accessible headless components
 - **Context Management**: Sophisticated state management patterns
@@ -166,7 +166,7 @@ npm run dev
 
 ### External Resources
 - [Next.js Documentation](https://nextjs.org/docs) - Framework reference
-- [Figma Embed API](https://www.figma.com/developers/embed) - Integration guide
+- [Figma Embed Kit 2.0](https://www.figma.com/developers/embed) - Integration guide
 - [Tailwind CSS](https://tailwindcss.com/docs) - Styling framework
 - [Shadcn/ui](https://ui.shadcn.com) - Component library reference
 

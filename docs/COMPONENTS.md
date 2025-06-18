@@ -70,33 +70,67 @@ const { currentDocSection, setCurrentDocSectionById, navigateToFigmaNode } = use
 **Purpose**: Embeds Figma prototype and handles bi-directional communication with the prototype.
 
 **Key Features**:
-- **Figma Embed Integration**: Uses Figma Embed API 2.0
-- **Message Handling**: Processes Figma events via postMessage API
+- **Figma Embed Kit 2.0 Integration**: Uses the latest Figma Embed Kit 2.0 (no script dependencies required)
+- **Enhanced Message Handling**: Processes all official Figma events with improved error handling
 - **State Synchronization**: Updates documentation based on prototype navigation
-- **Interaction Tracking**: Records user interactions with prototype
+- **Interaction Tracking**: Records detailed user interactions with prototype
+- **Complete API Coverage**: Implements all documented event types and control messages
 
-**Figma Events Handled**:
+**Figma Events Handled** (Official API):
 ```typescript
-// Event types processed from Figma
+// All official Embed Kit 2.0 events
 "INITIAL_LOAD"              // Prototype ready
 "PRESENTED_NODE_CHANGED"    // User navigated to new frame
-"MOUSE_PRESS_OR_RELEASE"    // User interaction
+"MOUSE_PRESS_OR_RELEASE"    // User interaction (hotspot vs canvas)
 "NEW_STATE"                 // Component state change
+"REQUEST_CLOSE"             // User pressed Spacebar to close
+"LOGIN_SCREEN_SHOWN"        // Authentication required
+"PASSWORD_SCREEN_SHOWN"     // Password-protected file
+```
+
+**Control Messages Supported**:
+```typescript
+// Prototype navigation controls
+"NAVIGATE_TO_FRAME_AND_CLOSE_OVERLAYS"  // Navigate to specific node
+"NAVIGATE_FORWARD"                      // Next frame in sequence
+"NAVIGATE_BACKWARD"                     // Previous frame in sequence
+"RESTART"                               // Restart prototype flow
 ```
 
 **Configuration**:
 ```typescript
-// Embed URL structure
-const embedSrc = `https://embed.figma.com/proto/${FIGMA_FILE_KEY}?embed-host=docuproto&client-id=${FIGMA_CLIENT_ID}`;
+// Embed Kit 2.0 URL - Enhanced with official parameters
+const embedSrc = `https://embed.figma.com/proto/${FIGMA_FILE_KEY}?embed-host=docuproto&client-id=${FIGMA_CLIENT_ID}&footer=false&hotspot-hints=true&theme=system&viewport-controls=true`;
 ```
+
+**URL Parameters Used**:
+- `embed-host`: Required identifier for the hosting application
+- `client-id`: Required for Embed API functionality
+- `footer=false`: Clean interface without Figma branding
+- `hotspot-hints=true`: Show clickable areas for better UX
+- `theme=system`: Automatically match user's system theme
+- `viewport-controls=true`: Allow panning and zooming
+
+**Migration Compliance**:
+- ✅ Uses `https://embed.figma.com/` subdomain (not `www.figma.com/embed`)
+- ✅ Uses hyphenated parameters (`embed-host`, `client-id`)
+- ✅ Includes required `client-id` for prototype control
+- ✅ Excludes deprecated `embed_origin` parameter
+- ✅ Handles all official event types from documentation
 
 **Security Features**:
 - Origin validation for Figma messages
-- Iframe sandboxing with restricted permissions
-- Safe message handling with type checking
+- Enhanced iframe sandboxing with presentation permissions
+- Clipboard access for better UX
+- Safe message handling with type checking and error boundaries
+
+**Performance Enhancements**:
+- Lazy loading for improved initial page load
+- useCallback for optimized event handling
+- No external script dependencies (unlike Embed API 1.0)
 
 **UI Elements**:
-- Header with prototype status
+- Header with Embed Kit 2.0 status indicator
 - Full-screen iframe container
 - Loading state indicators
 

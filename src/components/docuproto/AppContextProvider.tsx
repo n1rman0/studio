@@ -8,6 +8,9 @@ interface AppContextType {
   currentDocSection: DocSection | null;
   setCurrentDocSectionById: (id: string | null) => void;
   navigateToFigmaNode: (nodeId: string) => void;
+  navigateForward: () => void;
+  navigateBackward: () => void;
+  restartPrototype: () => void;
   figmaIframeRef: React.RefObject<HTMLIFrameElement>;
   interactionHistory: string[];
   addInteraction: (interaction: string) => void;
@@ -58,11 +61,50 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   }, [isFigmaReady]);
 
+  const navigateForward = useCallback(() => {
+    if (figmaIframeRef.current && figmaIframeRef.current.contentWindow && isFigmaReady) {
+      figmaIframeRef.current.contentWindow.postMessage(
+        { type: 'NAVIGATE_FORWARD' },
+        'https://www.figma.com'
+      );
+      addInteraction('Navigated forward in prototype');
+    } else {
+      console.warn("Figma iframe not ready for forward navigation.");
+    }
+  }, [isFigmaReady, addInteraction]);
+
+  const navigateBackward = useCallback(() => {
+    if (figmaIframeRef.current && figmaIframeRef.current.contentWindow && isFigmaReady) {
+      figmaIframeRef.current.contentWindow.postMessage(
+        { type: 'NAVIGATE_BACKWARD' },
+        'https://www.figma.com'
+      );
+      addInteraction('Navigated backward in prototype');
+    } else {
+      console.warn("Figma iframe not ready for backward navigation.");
+    }
+  }, [isFigmaReady, addInteraction]);
+
+  const restartPrototype = useCallback(() => {
+    if (figmaIframeRef.current && figmaIframeRef.current.contentWindow && isFigmaReady) {
+      figmaIframeRef.current.contentWindow.postMessage(
+        { type: 'RESTART' },
+        'https://www.figma.com'
+      );
+      addInteraction('Restarted prototype');
+    } else {
+      console.warn("Figma iframe not ready for restart.");
+    }
+  }, [isFigmaReady, addInteraction]);
+
   return (
     <AppContext.Provider value={{ 
         currentDocSection, 
         setCurrentDocSectionById, 
-        navigateToFigmaNode, 
+        navigateToFigmaNode,
+        navigateForward,
+        navigateBackward,
+        restartPrototype,
         figmaIframeRef,
         interactionHistory,
         addInteraction,

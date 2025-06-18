@@ -196,7 +196,7 @@ State Changes → Documentation Updates → AI Suggestions
 ## Integration Points
 
 ### External Services
-1. **Figma Embed API**: Interactive prototype embedding
+1. **Figma Embed Kit 2.0**: Interactive prototype embedding (no script dependencies)
 2. **Google AI (Genkit)**: Contextual AI suggestions
 3. **Firebase Hosting**: Application deployment
 4. **Google Fonts**: Typography (Inter, Space Grotesk)
