@@ -101,6 +101,17 @@ PaymentSDK.shared.applyTheme(theme)
 `,
     relatedSuggestionsQuery: 'customize PaymentSDK UI iOS',
   },
+  {
+    id: 'api-reference',
+    figmaNodeId: '7113-3300', // Hypothetical node ID
+    title: 'API Reference',
+    iconName: 'Code',
+    content: `
+<h1 class="font-headline text-3xl mb-4">API Reference</h1>
+<p class="mb-2">Complete API documentation with examples and response formats.</p>
+`,
+    relatedSuggestionsQuery: 'PaymentSDK API reference documentation',
+  },
 ];
 
 // export const FIGMA_PROTOTYPE_URL = "https://www.figma.com/proto/Qy1SqTQFBGy0MbDona2oA5/Finance-Management-Mobile-App-UI-UX-Kit-for-Budget-Tracker-Financial-Prototype-Design--Community-?node-id=7113-2955&starting-point-node-id=7113%3A2955&scaling=contain&hide-ui=1&hotspot-hints=false&show-proto-sidebar=false&footer=false&viewport-controls=false";

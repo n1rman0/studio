@@ -3,63 +3,89 @@ import React from 'react';
 interface DeviceWrapperProps {
   children: React.ReactNode;
   deviceType?: 'iphone' | 'android';
+  colorVariant?: 'purple' | 'silver' | 'black' | 'gold';
 }
 
-const DeviceWrapper: React.FC<DeviceWrapperProps> = ({ children, deviceType = 'iphone' }) => {
+const DeviceWrapper: React.FC<DeviceWrapperProps> = ({ 
+  children, 
+  deviceType = 'iphone',
+  colorVariant = 'purple'
+}) => {
+  // Color variants for iPhone 14 Pro
+  const colorStyles = {
+    purple: {
+      frame: 'border-[#2b2436] shadow-[inset_0_0_4px_2px_rgba(52,44,63,0.55),inset_0_0_0_6px_#342C3F]',
+      buttons: 'bg-[#2b2436]'
+    },
+    silver: {
+      frame: 'border-[#cccdce] shadow-[inset_0_0_4px_2px_rgba(226,227,228,0.55),inset_0_0_0_6px_#e2e3e4]',
+      buttons: 'bg-[#cccdce]'
+    },
+    black: {
+      frame: 'border-[#69655f] shadow-[inset_0_0_4px_2px_rgba(118,114,111,0.55),inset_0_0_0_6px_#76726F]',
+      buttons: 'bg-[#69655f]'
+    },
+    gold: {
+      frame: 'border-[#d4c7ab] shadow-[inset_0_0_4px_2px_rgba(246,238,219,0.55),inset_0_0_0_6px_rgba(246,238,219,0.65)]',
+      buttons: 'bg-[#d4c7ab]'
+    }
+  };
+
+  const currentColors = colorStyles[colorVariant];
+
   return (
     <div className="flex justify-center items-center min-h-full p-6">
-      <div className="device-shell relative w-[375px] h-[812px] bg-gray-800 rounded-[3rem] shadow-2xl p-1">
-        {/* Screen area */}
-        <div className="device-screen relative w-full h-full bg-black rounded-[2.8rem] overflow-hidden">
-          {/* Inner screen */}
-          <div className="w-full h-full bg-white rounded-[2.5rem] overflow-hidden relative">
-            {/* Status bar overlay */}
-            <div className="absolute top-0 left-0 right-0 h-11 bg-white z-50 flex items-center justify-between px-6 text-black text-sm font-medium">
-              <div className="flex items-center gap-1">
-                <span>9:41</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <div className="flex gap-1">
-                  <div className="w-4 h-2 border border-black rounded-sm">
-                    <div className="w-2 h-1 bg-black rounded-sm m-0.5"></div>
-                  </div>
-                  <div className="w-6 h-3 border border-black rounded-sm relative">
-                    <div className="w-4 h-1.5 bg-black rounded-sm m-0.5"></div>
-                    <div className="absolute -right-0.5 top-1 w-0.5 h-1 bg-black rounded-sm"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Content area - iframe renders here with proper constraints */}
+      {/* iPhone 14 Pro Container - 868px x 428px */}
+      <div className="relative w-[428px] h-[868px]">
+        {/* Device Frame */}
+        <div className={`
+          w-[428px] h-[868px] p-[19px] rounded-[68px] bg-[#010101]
+          border ${currentColors.frame}
+        `}>
+          {/* Screen Area - 390px x 830px */}
+          <div className="w-[390px] h-[830px] rounded-[49px] overflow-hidden relative bg-white">
             <div 
-              className="absolute top-0 left-0 right-0 bottom-0 overflow-hidden"
+              className="w-full h-full"
               style={{
-                width: '100%',
-                height: '100%'
+                transform: 'scale(1.3)',
+                transformOrigin: 'center center',
+                overflow: 'hidden'
               }}
             >
-              <div 
-                className="w-full h-full"
-                style={{
-                  transform: 'scale(1.35)',
-                  transformOrigin: 'center center',
-                  overflow: 'hidden',
-                  width: '100%',
-                  height: '100%'
-                }}
-              >
-                {children}
-              </div>
+              {children}
             </div>
           </div>
         </div>
 
-        {/* Notch overlay */}
-        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-gray-800 rounded-b-2xl z-60"></div>
+        {/* Dynamic Island Header */}
+        <div className="absolute top-[29px] left-1/2 transform -translate-x-1/2 w-[120px] h-[35px] bg-[#010101] rounded-[20px] z-50"></div>
         
-        {/* Home indicator overlay */}
-        <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-32 h-1 bg-gray-300 rounded-full z-60"></div>
+        {/* Dynamic Island Content */}
+        <div className="absolute top-[30px] left-1/2 transform -translate-x-1/2 w-[74px] h-[33px] bg-[#010101] rounded-[17px] z-40"></div>
+        
+        {/* Front Camera Sensor */}
+        <div className="absolute top-[42px] left-1/2 transform translate-x-[36px] -translate-y-1/2 w-[9px] h-[9px] rounded-full z-40"
+             style={{
+               background: 'radial-gradient(farthest-corner at 20% 20%, #6074BF 0, transparent 40%), radial-gradient(farthest-corner at 80% 80%, #513785 0, #24555E 20%, transparent 50%)',
+               boxShadow: '0 0 1px 1px rgba(255,255,255,0.05)'
+             }}>
+        </div>
+
+        {/* Volume Buttons */}
+        <div className={`absolute left-[-2px] top-[115px] w-[3px] h-[32px] rounded-sm ${currentColors.buttons}`}></div>
+        <div className={`absolute left-[-2px] top-[175px] w-[3px] h-[62px] rounded-sm ${currentColors.buttons}`}></div>
+        <div className={`absolute left-[-2px] top-[255px] w-[3px] h-[62px] rounded-sm ${currentColors.buttons}`}></div>
+
+        {/* Power Button */}
+        <div className={`absolute right-[-2px] top-[200px] w-[3px] h-[100px] rounded-sm ${currentColors.buttons}`}></div>
+
+        {/* Antenna Lines */}
+        <div className="absolute top-[85px] left-0 w-full h-[7px] border-l-[7px] border-r-[7px] border-black border-opacity-25 z-10"></div>
+        <div className="absolute bottom-[85px] left-0 w-full h-[7px] border-l-[7px] border-r-[7px] border-black border-opacity-25 z-10"></div>
+
+        {/* Home Indicator Areas */}
+        <div className="absolute top-0 right-[86px] w-[6px] h-[6px] border-t-[6px] border-black border-opacity-25 z-10"></div>
+        <div className="absolute bottom-0 left-[86px] w-[6px] h-[6px] border-b-[6px] border-black border-opacity-25 z-10"></div>
       </div>
     </div>
   );

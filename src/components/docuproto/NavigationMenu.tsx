@@ -9,7 +9,7 @@ import {
   SidebarMenuButton,
 } from '@/components/ui/sidebar';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { BookOpen, Settings, CreditCard, Palette, type LucideIcon } from 'lucide-react'; // Added Palette
+import { BookOpen, Settings, CreditCard, Palette, Code, type LucideIcon } from 'lucide-react'; // Added Palette and Code
 
 interface IconMap {
   [key: string]: LucideIcon;
@@ -20,6 +20,7 @@ const iconMap: IconMap = {
   Settings,
   CreditCard,
   Palette, // Added Palette to map
+  Code, // Added Code to map
 };
 
 
@@ -33,7 +34,7 @@ const NavigationMenu: React.FC = () => {
 
   return (
     <ScrollArea className="h-full">
-      <SidebarMenu>
+      <SidebarMenu className="gap-1">
         {IOS_DOCUMENTATION.map((section) => {
           const IconComponent = section.iconName ? iconMap[section.iconName] : BookOpen;
           return (
@@ -42,10 +43,10 @@ const NavigationMenu: React.FC = () => {
                 onClick={() => handleNavigation(section.id, section.figmaNodeId)}
                 isActive={currentDocSection?.id === section.id}
                 tooltip={section.title}
-                className="text-sm"
+                className="text-sm font-medium h-10 px-3 rounded-md hover:bg-gray-100 data-[active=true]:bg-blue-50 data-[active=true]:text-blue-700 data-[active=true]:border-blue-200"
               >
-                <IconComponent className="h-4 w-4" />
-                <span>{section.title}</span>
+                <IconComponent className="h-4 w-4 flex-shrink-0" />
+                <span className="truncate">{section.title}</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           );

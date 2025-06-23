@@ -88,7 +88,7 @@ const FigmaEmbed: React.FC = () => {
 
   // Embed Kit 2.0 URL - Enhanced with official parameters for better UX
   // Based on official documentation: https://www.figma.com/developers/embed
-  const embedSrc = `https://embed.figma.com/proto/${FIGMA_FILE_KEY}?embed-host=docuproto&client-id=${FIGMA_CLIENT_ID}&footer=false&hotspot-hints=false&theme=light&viewport-controls=false&disable-default-keyboard-nav=false&page-selector=false&hide-ui=true&scaling=fill`;
+  const embedSrc = `https://embed.figma.com/proto/${FIGMA_FILE_KEY}?embed-host=docuproto&client-id=${FIGMA_CLIENT_ID}&footer=false&hotspot-hints=false&theme=light&viewport-controls=false&disable-default-keyboard-nav=false&page-selector=false&hide-ui=true&scaling=fit`;
 
   return (
     <div className="w-full h-full pb-12">
