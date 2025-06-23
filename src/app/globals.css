@@ -109,7 +109,7 @@ body {
 
 /* Enhanced styles for API documentation */
 .api-code-block {
-  background: linear-gradient(to right, hsl(var(--api-line-number-bg)) 0, hsl(var(--api-line-number-bg)) 48px, hsl(var(--api-code-bg)) 48px);
+  background: linear-gradient(to right, hsl(var(--api-line-number-bg)) 0, hsl(var(--api-line-number-bg)) 48px, #fafafa 48px);
   border: 1px solid hsl(var(--api-code-border));
   border-radius: 8px;
   font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
@@ -117,6 +117,13 @@ body {
   line-height: 1.5;
   overflow: hidden;
   position: relative;
+  /* Graph paper grid background with 80px squares */
+  background-image: 
+    linear-gradient(to right, hsl(var(--api-line-number-bg)) 0, hsl(var(--api-line-number-bg)) 48px, transparent 48px),
+    linear-gradient(rgba(200, 200, 200, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(200, 200, 200, 0.1) 1px, transparent 1px);
+  background-size: 100% 100%, 10px 10px, 10px 10px;
+  background-position: 0 0, 48px 0, 48px 0;
 }
 
 .api-code-block::before {
@@ -127,6 +134,23 @@ body {
   bottom: 0;
   width: 1px;
   background: hsl(var(--api-code-border));
+}
+
+/* Add gradient overlay */
+.api-code-block::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 48px;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    to right, 
+    #ffffff 0%,        /* solid white for the first 70% of the overlay */ 
+    rgba(250,255,250,0) /* fully transparent by the far left edge */
+  );
+  pointer-events: none;
+  z-index: 1;
 }
 
 .api-line-numbers {
@@ -148,11 +172,9 @@ body {
   white-space: pre;
   font-feature-settings: 'liga' 0;
   color: #24292e;
-  /* Add subtle dotted grid background */
-  background-image: 
-    radial-gradient(circle, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
-  background-size: 20px 20px;
-  background-position: 8px 8px;
+  background: transparent;
+  position: relative;
+  z-index: 2;
 }
 
 /* JSON Syntax highlighting */
