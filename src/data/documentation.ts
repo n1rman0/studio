@@ -8,6 +8,12 @@ export interface DocSection {
   iconName?: string;
 }
 
+
+// Cart - 0:1348
+// Cart Loading - 5:355
+// Checkout - 0:1220
+
+
 // It's better to import icons where they are used to keep this file data-only
 // For now, we'll define them as strings and map them in NavigationMenu.tsx
 // Example: import { BookOpen, Settings, CreditCard } from 'lucide-react';
@@ -15,7 +21,7 @@ export interface DocSection {
 export const IOS_DOCUMENTATION: DocSection[] = [
   {
     id: 'welcome',
-    figmaNodeId: '7113-2955', // Starting node ID from Figma link
+    figmaNodeId: '0:1348', // Starting node ID from Figma link
     title: 'Welcome to Payment SDK',
     iconName: 'BookOpen',
     content: `
@@ -32,7 +38,7 @@ export const IOS_DOCUMENTATION: DocSection[] = [
   },
   {
     id: 'initialization',
-    figmaNodeId: '7113-3000', // Hypothetical node ID
+    figmaNodeId: '5:355', // Hypothetical node ID
     title: 'SDK Initialization',
     iconName: 'Settings',
     content: `
@@ -54,7 +60,7 @@ func application(_ application: UIApplication, didFinishLaunchingWithOptions lau
   },
   {
     id: 'making-payment',
-    figmaNodeId: '7113-3100', // Hypothetical node ID
+    figmaNodeId: '0:1220', // Hypothetical node ID
     title: 'Making a Payment',
     iconName: 'CreditCard',
     content: `
@@ -116,9 +122,13 @@ PaymentSDK.shared.applyTheme(theme)
 
 // export const FIGMA_PROTOTYPE_URL = "https://www.figma.com/proto/Qy1SqTQFBGy0MbDona2oA5/Finance-Management-Mobile-App-UI-UX-Kit-for-Budget-Tracker-Financial-Prototype-Design--Community-?node-id=7113-2955&starting-point-node-id=7113%3A2955&scaling=contain&hide-ui=1&hotspot-hints=false&show-proto-sidebar=false&footer=false&viewport-controls=false";
 
+// https://www.figma.com/proto/QPOIyfhh0EBiMmxwje72vb/TestDocuProto?t=jaGNq35VJJr3y5ZD-1&scaling=min-zoom&content-scaling=fixed&page-id=0%3A1&node-id=0-1348
+
 // --- New constants for Embed Kit 2.0 ---
 // Extracted from the FIGMA_PROTOTYPE_URL
-export const FIGMA_FILE_KEY = "Qy1SqTQFBGy0MbDona2oA5"; 
+export const FIGMA_FILE_KEY = "QPOIyfhh0EBiMmxwje72vb";
+// export const FIGMA_FILE_KEY = "Qy1SqTQFBGy0MbDona2oA5"; 
 // uoGu3U8xmrBAxw2jUm91LQ // Qy1SqTQFBGy0MbDona2oA5
 // IMPORTANT: Replace with your actual Figma OAuth App Client ID
-export const FIGMA_CLIENT_ID = "eei95vaW5N3lSAmtqIeWnL"; 
+export const FIGMA_CLIENT_ID = "eei95vaW5N3lSAmtqIeWnL";
+// export const FIGMA_CLIENT_ID = "jaGNq35VJJr3y5ZD-1"; 

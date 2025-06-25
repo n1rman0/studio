@@ -62,6 +62,7 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   }, [isFigmaReady]);
 
   const navigateForward = useCallback(() => {
+    console.log('Navigating forward');
     if (figmaIframeRef.current && figmaIframeRef.current.contentWindow && isFigmaReady) {
       figmaIframeRef.current.contentWindow.postMessage(
         { type: 'NAVIGATE_FORWARD' },
@@ -74,6 +75,7 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   }, [isFigmaReady, addInteraction]);
 
   const navigateBackward = useCallback(() => {
+    console.log('Navigating backward');
     if (figmaIframeRef.current && figmaIframeRef.current.contentWindow && isFigmaReady) {
       figmaIframeRef.current.contentWindow.postMessage(
         { type: 'NAVIGATE_BACKWARD' },

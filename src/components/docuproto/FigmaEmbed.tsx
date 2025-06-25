@@ -24,7 +24,7 @@ const FigmaEmbed: React.FC = () => {
           addInteraction("Prototype loaded successfully");
           console.log("Figma Embed Kit 2.0: Prototype ready");
           break;
-          
+
         case "PRESENTED_NODE_CHANGED":
           const nodeId = data.data?.presentedNodeId;
           if (nodeId) {
@@ -38,7 +38,7 @@ const FigmaEmbed: React.FC = () => {
             }
           }
           break;
-          
+
         case "MOUSE_PRESS_OR_RELEASE":
           const targetNodeId = data.data?.targetNodeId;
           const isHandledClick = data.data?.handled;
@@ -46,7 +46,7 @@ const FigmaEmbed: React.FC = () => {
             addInteraction(`${isHandledClick ? 'Hotspot' : 'Canvas'} interaction: ${targetNodeId}`);
           }
           break;
-          
+
         case "NEW_STATE":
           const componentNodeId = data.data?.nodeId;
           const newVariantId = data.data?.newVariantId;
@@ -68,7 +68,7 @@ const FigmaEmbed: React.FC = () => {
           addInteraction("Password prompt displayed");
           console.log("Password screen shown - file is password protected");
           break;
-          
+
         default:
           console.log("Unhandled Figma message type:", data.type);
           break;
@@ -88,18 +88,25 @@ const FigmaEmbed: React.FC = () => {
 
   // Embed Kit 2.0 URL - Enhanced with official parameters for better UX
   // Based on official documentation: https://www.figma.com/developers/embed
-  const embedSrc = `https://embed.figma.com/proto/${FIGMA_FILE_KEY}?embed-host=docuproto&client-id=${FIGMA_CLIENT_ID}&footer=false&hotspot-hints=false&theme=light&viewport-controls=false&disable-default-keyboard-nav=false&page-selector=false&hide-ui=true&scaling=fit`;
+  const embedSrc = `https://embed.figma.com/proto/${FIGMA_FILE_KEY}?embed-host=docuproto&client-id=${FIGMA_CLIENT_ID}&footer=false&hotspot-hints=false&theme=light&viewport-controls=false&disable-default-keyboard-nav=true&page-selector=false&hide-ui=true&scaling=fit`;
 
   return (
-    <div className="w-full h-full pb-12">
+    <div
+      className="w-full h-full pb-12 relative"
+      style={{
+        backgroundImage: `radial-gradient(circle, #d1d5db 1px, transparent 1px)`,
+        backgroundSize: '30px 30px',
+        backgroundColor: '#f9fafb'
+      }}
+    >
       <DeviceWrapper>
         <iframe
           ref={figmaIframeRef}
           id="embed-frame"
           className="w-full h-full border-0 bg-transparent"
-          style={{ 
-            width: '100%', 
-            height: '100%', 
+          style={{
+            width: '100%',
+            height: '100%',
             border: 'none',
             background: 'transparent',
             display: 'block',

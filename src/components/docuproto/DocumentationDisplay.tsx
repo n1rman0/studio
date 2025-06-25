@@ -57,7 +57,7 @@ const DocumentationDisplay: React.FC = () => {
 
   if (!currentDocSection) {
     return (
-      <Card className="w-full h-full flex items-center justify-center shadow-sm border-gray-200">
+      <Card className="w-full h-full flex items-center justify-center shadow-sm border-gray-200 rounded-none">
         <CardContent className="text-center">
           <p className="text-gray-500">Select a section from the navigation or click on the prototype.</p>
         </CardContent>
@@ -67,26 +67,7 @@ const DocumentationDisplay: React.FC = () => {
 
   // Always show API Documentation prominently
   return (
-    <Card className="w-full h-full flex flex-col shadow-sm border-gray-200 overflow-hidden">
-      <CardHeader className="border-b border-gray-200 bg-white">
-        <div className="flex justify-between items-center">
-          <div>
-            <CardTitle className="font-headline text-xl text-gray-900">API Documentation</CardTitle>
-            <CardDescription className="text-gray-600">API endpoints and examples for integration</CardDescription>
-          </div>
-          {currentDocSection.figmaNodeId && (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => navigateToFigmaNode(currentDocSection.figmaNodeId)}
-              className="bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
-            >
-              <Eye className="mr-2 h-4 w-4" />
-              View in Prototype
-            </Button>
-          )}
-        </div>
-      </CardHeader>
+    <Card className="w-full h-full flex flex-col shadow-sm border-gray-200 overflow-hidden rounded-none">
       <ScrollArea className="flex-grow bg-white">
         <CardContent className="pt-6">
           <APIDocumentation endpoints={sampleAPIEndpoints} />
