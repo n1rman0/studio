@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 
 interface DeviceWrapperProps {
   children: React.ReactNode;
@@ -11,6 +11,45 @@ const DeviceWrapper: React.FC<DeviceWrapperProps> = ({
   deviceType = 'iphone',
   colorVariant = 'purple'
 }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+  
+  // Device dimensions
+  const DEVICE_WIDTH = 428;
+  const DEVICE_HEIGHT = 868;
+  const PADDING = 48; // 24px on each side
+
+  useEffect(() => {
+    const calculateScale = () => {
+      if (!containerRef.current) return;
+      
+      const containerRect = containerRef.current.getBoundingClientRect();
+      const availableWidth = containerRect.width - PADDING;
+      const availableHeight = containerRect.height - PADDING;
+      
+      // Calculate scale factors for both dimensions
+      const scaleX = availableWidth / DEVICE_WIDTH;
+      const scaleY = availableHeight / DEVICE_HEIGHT;
+      
+      // Use the smaller scale to maintain aspect ratio
+      const newScale = Math.min(scaleX, scaleY, 1); // Never scale up
+      setScale(newScale);
+    };
+
+    // Initial calculation
+    calculateScale();
+
+    // Set up ResizeObserver to recalculate on container size changes
+    const resizeObserver = new ResizeObserver(calculateScale);
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
+
   // Color variants for iPhone 14 Pro
   const colorStyles = {
     purple: {
@@ -34,9 +73,17 @@ const DeviceWrapper: React.FC<DeviceWrapperProps> = ({
   const currentColors = colorStyles[colorVariant];
 
   return (
-    <div className="flex justify-center items-center min-h-full p-6">
-      {/* iPhone 14 Pro Container - 868px x 428px */}
-      <div className="relative w-[428px] h-[868px]">
+    <div ref={containerRef} className="flex justify-center items-center w-full h-full p-6">
+      {/* iPhone 14 Pro Container with dynamic scaling */}
+      <div 
+        className="relative"
+        style={{
+          width: `${DEVICE_WIDTH}px`,
+          height: `${DEVICE_HEIGHT}px`,
+          transform: `scale(${scale})`,
+          transformOrigin: 'center center'
+        }}
+      >
         {/* Device Frame */}
         <div className={`
           w-[428px] h-[868px] p-[19px] rounded-[68px] bg-[#010101]
