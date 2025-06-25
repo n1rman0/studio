@@ -20,103 +20,159 @@ export interface DocSection {
 
 export const IOS_DOCUMENTATION: DocSection[] = [
   {
-    id: 'welcome',
-    figmaNodeId: '0:1348', // Starting node ID from Figma link
-    title: 'Welcome to Payment SDK',
+    id: 'cart',
+    figmaNodeId: '0:1348', // Cart node ID
+    title: 'Shopping Cart Implementation',
     iconName: 'BookOpen',
     content: `
-<h1 class="font-headline text-3xl mb-4">Welcome to the Payment SDK for iOS</h1>
-<p class="mb-2">This guide will help you integrate our powerful payment processing capabilities into your iOS application.</p>
-<h2 class="font-headline text-2xl mt-4 mb-2">Key Features:</h2>
-<ul class="list-disc pl-5 space-y-1">
-  <li>Seamless in-app purchases</li>
-  <li>Secure transaction handling</li>
-  <li>Customizable UI components</li>
-</ul>
-`,
-    relatedSuggestionsQuery: 'getting started with Payment SDK',
-  },
-  {
-    id: 'initialization',
-    figmaNodeId: '5:355', // Hypothetical node ID
-    title: 'SDK Initialization',
-    iconName: 'Settings',
-    content: `
-<h1 class="font-headline text-3xl mb-4">Initializing the SDK</h1>
-<p class="mb-2">To start using the Payment SDK, you first need to initialize it with your API key.</p>
+<h1 class="font-headline text-3xl mb-4">Shopping Cart Implementation</h1>
+<p class="mb-2">Learn how to implement a robust shopping cart system in your iOS app with our e-commerce SDK.</p>
+<h2 class="font-headline text-2xl mt-4 mb-2">Cart Management</h2>
 <div class="bg-muted p-4 rounded-md my-4">
 <pre><code class="font-code text-sm">
-import PaymentSDK
+import ECommerceSDK
 
-func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-    PaymentSDK.initialize(apiKey: "YOUR_API_KEY")
-    return true
-}
+// Initialize cart
+let cart = ShoppingCart()
+
+// Add items to cart
+let product = Product(id: "123", name: "iPhone Case", price: 29.99)
+cart.addItem(product, quantity: 2)
+
+// Update quantity
+cart.updateQuantity(productId: "123", quantity: 3)
+
+// Remove item
+cart.removeItem(productId: "123")
+
+// Get cart total
+let total = cart.getTotalPrice()
 </code></pre>
 </div>
-<p>Ensure you call this early in your app's lifecycle, typically in your <code>AppDelegate</code>'s <code>didFinishLaunchingWithOptions</code> method.</p>
-`,
-    relatedSuggestionsQuery: 'how to initialize PaymentSDK iOS',
-  },
-  {
-    id: 'making-payment',
-    figmaNodeId: '0:1220', // Hypothetical node ID
-    title: 'Making a Payment',
-    iconName: 'CreditCard',
-    content: `
-<h1 class="font-headline text-3xl mb-4">Making a Payment</h1>
-<p class="mb-2">Once initialized, making a payment is straightforward using the <code>processPayment</code> method.</p>
+<h2 class="font-headline text-2xl mt-4 mb-2">Cart Persistence</h2>
+<p class="mb-2">The cart automatically persists data locally using Core Data, ensuring user's cart survives app restarts.</p>
 <div class="bg-muted p-4 rounded-md my-4">
 <pre><code class="font-code text-sm">
-let paymentDetails = PaymentDetails(amount: 10.99, currency: "USD")
-PaymentSDK.shared.processPayment(details: paymentDetails) { result in
-    switch result {
-    case .success(let transactionId):
-        print("Payment successful: \\(transactionId)")
-    case .failure(let error):
-        print("Payment failed: \\(error.localizedDescription)")
+// Save cart to persistent storage
+cart.save()
+
+// Load existing cart
+let savedCart = ShoppingCart.loadFromStorage()
+</code></pre>
+</div>
+`,
+    relatedSuggestionsQuery: 'iOS shopping cart implementation best practices',
+  },
+  {
+    id: 'cart-loading',
+    figmaNodeId: '5:355', // Cart Loading node ID
+    title: 'Cart Loading States',
+    iconName: 'BookOpen',
+    content: `
+<h1 class="font-headline text-3xl mb-4">Managing Cart Loading States</h1>
+<p class="mb-2">Provide excellent user experience by properly handling loading states during cart operations.</p>
+<h2 class="font-headline text-2xl mt-4 mb-2">Loading State Management</h2>
+<div class="bg-muted p-4 rounded-md my-4">
+<pre><code class="font-code text-sm">
+class CartViewController: UIViewController {
+    @IBOutlet weak var loadingIndicator: UIActivityIndicatorView!
+    @IBOutlet weak var cartTableView: UITableView!
+    
+    func loadCartItems() {
+        showLoadingState()
+        
+        CartService.shared.fetchCartItems { [weak self] result in
+            DispatchQueue.main.async {
+                self?.hideLoadingState()
+                
+                switch result {
+                case .success(let items):
+                    self?.updateCartUI(with: items)
+                case .failure(let error):
+                    self?.showError(error)
+                }
+            }
+        }
+    }
+    
+    private func showLoadingState() {
+        loadingIndicator.startAnimating()
+        cartTableView.isUserInteractionEnabled = false
+        cartTableView.alpha = 0.5
+    }
+    
+    private func hideLoadingState() {
+        loadingIndicator.stopAnimating()
+        cartTableView.isUserInteractionEnabled = true
+        cartTableView.alpha = 1.0
     }
 }
 </code></pre>
 </div>
-<p>This will present the SDK's payment UI to the user. Handle the result in the completion handler to update your app's state accordingly.</p>
+<h2 class="font-headline text-2xl mt-4 mb-2">Skeleton Loading</h2>
+<p class="mb-2">Implement skeleton screens for better perceived performance during cart loading.</p>
 `,
-    relatedSuggestionsQuery: 'process payment iOS SDK example',
+    relatedSuggestionsQuery: 'iOS loading states UX best practices',
   },
   {
-    id: 'ui-customization',
-    figmaNodeId: '7113-3200', // Hypothetical node ID
-    title: 'UI Customization',
-    iconName: 'Palette',
+    id: 'checkout',
+    figmaNodeId: '0:1220', // Checkout node ID
+    title: 'Checkout Process',
+    iconName: 'BookOpen',
     content: `
-<h1 class="font-headline text-3xl mb-4">Customizing the UI</h1>
-<p class="mb-2">The Payment SDK allows for extensive UI customization to match your app's look and feel.</p>
-<h2 class="font-headline text-2xl mt-4 mb-2">Theme Configuration</h2>
-<p class="mb-2">You can provide a theme object during initialization or update it at runtime:</p>
+<h1 class="font-headline text-3xl mb-4">Implementing Secure Checkout</h1>
+<p class="mb-2">Complete the purchase flow with our secure checkout implementation supporting multiple payment methods.</p>
+<h2 class="font-headline text-2xl mt-4 mb-2">Checkout Flow</h2>
 <div class="bg-muted p-4 rounded-md my-4">
 <pre><code class="font-code text-sm">
-let theme = PaymentSDKTheme(
-    primaryColor: .blue,
-    secondaryColor: .lightGray,
-    font: UIFont.systemFont(ofSize: 16)
-)
-PaymentSDK.shared.applyTheme(theme)
+<APIDocumentationExample/>
+import PaymentSDK
+
+class CheckoutViewController: UIViewController {
+    
+    func initiateCheckout() {
+        let checkoutData = CheckoutData(
+            cart: currentCart,
+            shippingAddress: userShippingAddress,
+            billingAddress: userBillingAddress
+        )
+        
+        PaymentSDK.shared.presentCheckout(
+            with: checkoutData,
+            from: self
+        ) { [weak self] result in
+            switch result {
+            case .success(let transaction):
+                self?.handleSuccessfulPayment(transaction)
+            case .failure(let error):
+                self?.handlePaymentError(error)
+            case .cancelled:
+                self?.handlePaymentCancellation()
+            }
+        }
+    }
+    
+    private func handleSuccessfulPayment(_ transaction: Transaction) {
+        // Clear cart
+        ShoppingCart.shared.clear()
+        
+        // Show success screen
+        let successVC = OrderConfirmationViewController(transaction: transaction)
+        navigationController?.pushViewController(successVC, animated: true)
+    }
+}
 </code></pre>
 </div>
-<p>Refer to the <code>PaymentSDKTheme</code> documentation for all available customization options.</p>
+<h2 class="font-headline text-2xl mt-4 mb-2">Payment Methods</h2>
+<p class="mb-2">Support multiple payment options including Apple Pay, credit cards, and digital wallets.</p>
+<ul class="list-disc pl-5 space-y-1 mb-4">
+  <li>Apple Pay integration</li>
+  <li>Credit/Debit cards (Stripe, Square)</li>
+  <li>PayPal and digital wallets</li>
+  <li>Buy now, pay later options</li>
+</ul>
 `,
-    relatedSuggestionsQuery: 'customize PaymentSDK UI iOS',
-  },
-  {
-    id: 'api-reference',
-    figmaNodeId: '7113-3300', // Hypothetical node ID
-    title: 'API Reference',
-    iconName: 'Code',
-    content: `
-<h1 class="font-headline text-3xl mb-4">API Reference</h1>
-<p class="mb-2">Complete API documentation with examples and response formats.</p>
-`,
-    relatedSuggestionsQuery: 'PaymentSDK API reference documentation',
+    relatedSuggestionsQuery: 'iOS secure checkout implementation payment methods',
   },
 ];
 
@@ -130,5 +186,5 @@ export const FIGMA_FILE_KEY = "QPOIyfhh0EBiMmxwje72vb";
 // export const FIGMA_FILE_KEY = "Qy1SqTQFBGy0MbDona2oA5"; 
 // uoGu3U8xmrBAxw2jUm91LQ // Qy1SqTQFBGy0MbDona2oA5
 // IMPORTANT: Replace with your actual Figma OAuth App Client ID
-export const FIGMA_CLIENT_ID = "eei95vaW5N3lSAmtqIeWnL";
+export const FIGMA_CLIENT_ID = "bYl9dYt9uFb5zjdkB7mQ4z";
 // export const FIGMA_CLIENT_ID = "jaGNq35VJJr3y5ZD-1"; 

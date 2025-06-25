@@ -8,7 +8,7 @@ import TopNavigation from '@/components/docuproto/TopNavigation';
 import { useEffect } from 'react';
 
 const DocuProtoContent = () => {
-  const { navigateForward, navigateBackward } = useAppContext();
+  const { navigateForward, navigateBackward, navigateToFigmaNode } = useAppContext();
 
   const handleBackClick = () => {
     navigateBackward();
@@ -46,7 +46,7 @@ const DocuProtoContent = () => {
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [navigateBackward, navigateForward]);
+  }, [navigateBackward, navigateToFigmaNode]);
 
   return (
     <div className="min-h-screen bg-background relative">

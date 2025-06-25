@@ -48,6 +48,10 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
 
   const navigateToFigmaNode = useCallback((nodeId: string) => {
+    console.log("Navigating to Figma node:", nodeId);
+    console.log("Figma iframe ref:", figmaIframeRef.current);
+    console.log("Figma iframe content window:", figmaIframeRef.current?.contentWindow);
+    console.log("Is Figma ready:", isFigmaReady);
     if (figmaIframeRef.current && figmaIframeRef.current.contentWindow && isFigmaReady) {
       figmaIframeRef.current.contentWindow.postMessage(
         {
