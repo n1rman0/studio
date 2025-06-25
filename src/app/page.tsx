@@ -1,7 +1,7 @@
 import { AppContextProvider } from '@/components/docuproto/AppContextProvider';
 import EventDisplay from '@/components/docuproto/ContextualSuggestions';
 import DocumentationDisplay from '@/components/docuproto/DocumentationDisplay';
-import FigmaEmbed from '@/components/docuproto/ContextualSuggestions';
+import FigmaEmbed from '@/components/docuproto/FigmaEmbed';
 import TopNavigation from '@/components/docuproto/TopNavigation';
 
 export default function DocuProtoPage() {
