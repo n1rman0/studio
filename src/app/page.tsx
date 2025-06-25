@@ -2,7 +2,7 @@ import { AppContextProvider } from '@/components/docuproto/AppContextProvider';
 import EventDisplay from '@/components/docuproto/ContextualSuggestions';
 import DocumentationDisplay from '@/components/docuproto/DocumentationDisplay';
 import NavigationMenu from '@/components/docuproto/NavigationMenu';
-import EventDisplay from '@/components/docuproto/ContextualSuggestions';
+import FigmaEmbed from '@/components/docuproto/ContextualSuggestions';
 import {
   SidebarProvider,
   Sidebar,
