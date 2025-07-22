@@ -155,15 +155,6 @@ const ShoppingCartAPIExample: React.FC = () => {
 
   return (
     <div className="w-full">
-      <div className="mb-8">
-        <div className="text-center mb-4">
-          <TypewriterEffectSmooth
-            words={typewriterWords}
-            className="text-lg sm:text-xl md:text-2xl lg:text-3xl"
-          />
-        </div>
-      </div>
-
       <APIDocumentation endpoints={cartEndpoints} />
     </div>
   );

@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ChevronDown, ChevronRight, Copy, Check } from 'lucide-react';
+import { JSONTypewriterEffect } from '@/components/ui/json-typewriter-effect';
 
 interface APIEndpoint {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
@@ -20,7 +21,15 @@ interface APIDocumentationProps {
 }
 
 const APIDocumentation: React.FC<APIDocumentationProps> = ({ endpoints }) => {
-  const [collapsedSections, setCollapsedSections] = useState<Record<number, boolean>>({});
+  // Initialize collapsed state - only /cart endpoint expanded, all others collapsed
+  const [collapsedSections, setCollapsedSections] = useState<Record<number, boolean>>(() => {
+    const initialState: Record<number, boolean> = {};
+    endpoints.forEach((endpoint, index) => {
+      // Collapse all endpoints except /cart
+      initialState[index] = endpoint.path !== '/cart';
+    });
+    return initialState;
+  });
   const [copiedStates, setCopiedStates] = useState<Record<string, boolean>>({});
 
   const toggleSection = (index: number) => {
@@ -140,7 +149,7 @@ const APIDocumentation: React.FC<APIDocumentationProps> = ({ endpoints }) => {
 
             {!isCollapsed && (
               <CardContent className="pt-6 pb-6">
-                <Tabs defaultValue="response" className="w-full">
+                <Tabs defaultValue="request" className="w-full">
                   <TabsList className="api-tabs-list">
                     <TabsTrigger 
                       value="request" 
@@ -172,7 +181,15 @@ const APIDocumentation: React.FC<APIDocumentationProps> = ({ endpoints }) => {
                             <Copy className="h-4 w-4 text-gray-500" />
                           )}
                         </Button>
-                        {renderJSONWithLineNumbers(formatJSON(endpoint.requestExample))}
+                        {endpoint.path === '/cart' ? (
+                          <JSONTypewriterEffect 
+                            jsonObject={endpoint.requestExample} 
+                            speed={25}
+                            showLineNumbers={true}
+                          />
+                        ) : (
+                          renderJSONWithLineNumbers(formatJSON(endpoint.requestExample))
+                        )}
                       </div>
                     </TabsContent>
                   )}

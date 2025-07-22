@@ -59,9 +59,9 @@ const DocuProtoContent = () => {
           <div className="flex-grow overflow-hidden">
             <DocumentationDisplay />
           </div>
-          <div className="shrink-0">
+          {/* <div className="shrink-0">
             <EventDisplay />
-          </div>
+          </div> */}
         </div>
       </div>
 

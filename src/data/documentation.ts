@@ -29,7 +29,7 @@ export const IOS_DOCUMENTATION: DocSection[] = [
 <h2 class="font-headline text-2xl mt-4 mb-2">Cart Management</h2>
 <div class="bg-muted p-4 rounded-md my-4">
 <pre><code class="font-code text-sm">
-import ECommerceSDK
+import RazorpaySDK
 
 // Initialize cart
 let cart = ShoppingCart()
@@ -74,60 +74,6 @@ let savedCart = ShoppingCart.loadFromStorage()
 <ShoppingCartAPIExample/>
 `,
         relatedSuggestionsQuery: 'iOS loading states UX best practices',
-    },
-    {
-        id: 'checkout-loading',
-        figmaNodeId: '3:161', // Checkout Loading node ID
-        title: 'Checkout Loading States',
-        iconName: 'BookOpen',
-        content: `
-<h1 class="font-headline text-3xl mb-4">Managing Checkout Loading States</h1>
-<p class="mb-2">Ensure a smooth checkout experience by implementing proper loading states during payment processing and order completion.</p>
-
-<h2 class="font-headline text-2xl mt-6 mb-2">Payment Processing States</h2>
-<div class="bg-muted p-4 rounded-md my-4">
-
-</div>
-<h2 class="font-headline text-2xl mt-4 mb-2">Loading State UI Components</h2>
-<p class="mb-2">Create visually appealing loading indicators that keep users informed during the checkout process.</p>
-<div class="bg-muted p-4 rounded-md my-4">
-
-</div>
-<h2 class="font-headline text-2xl mt-4 mb-2">Error Handling During Loading</h2>
-<p class="mb-2">Gracefully handle errors and provide clear feedback when checkout operations fail.</p>
-<div class="bg-muted p-4 rounded-md my-4">
-<pre><code class="font-code text-sm">
-private func showErrorState(_ error: PaymentError) {
-    let alert = UIAlertController(
-        title: "Payment Failed",
-        message: error.localizedDescription,
-        preferredStyle: .alert
-    )
-    
-    alert.addAction(UIAlertAction(title: "Try Again", style: .default) { _ in
-        self.processPayment()
-    })
-    
-    alert.addAction(UIAlertAction(title: "Cancel", style: .cancel) { _ in
-        self.navigationController?.popViewController(animated: true)
-    })
-    
-    present(alert, animated: true)
-}
-</code></pre>
-</div>
-`,
-        relatedSuggestionsQuery: 'iOS checkout loading states payment processing UX',
-    },
-    {
-        id: 'payment-success',
-        figmaNodeId: '100:279', // Payment Success node ID
-        title: 'Payment Success',
-        iconName: 'BookOpen',
-        content: `
-<h1 class="font-headline text-3xl mb-4">Payment Success</h1>
-`,
-        relatedSuggestionsQuery: 'iOS payment success confirmation UX',
     },
     {
         id: 'checkout',
@@ -189,6 +135,53 @@ class CheckoutViewController: UIViewController {
 `,
         relatedSuggestionsQuery: 'iOS secure checkout implementation payment methods',
     },
+    {
+        id: 'checkout-loading',
+        figmaNodeId: '3:161', // Checkout Loading node ID
+        title: 'Checkout Loading States',
+        iconName: 'BookOpen',
+        content: `
+<h1 class="font-headline text-3xl mb-4">Managing Checkout Loading States</h1>
+<p class="mb-2">Ensure a smooth checkout experience by implementing proper loading states during payment processing and order completion.</p>
+
+</div>
+<h2 class="font-headline text-2xl mt-4 mb-2">Error Handling During Loading</h2>
+<p class="mb-2">Gracefully handle errors and provide clear feedback when checkout operations fail.</p>
+<div class="bg-muted p-4 rounded-md my-4">
+<pre><code class="font-code text-sm">
+private func showErrorState(_ error: PaymentError) {
+    let alert = UIAlertController(
+        title: "Payment Failed",
+        message: error.localizedDescription,
+        preferredStyle: .alert
+    )
+    
+    alert.addAction(UIAlertAction(title: "Try Again", style: .default) { _ in
+        self.processPayment()
+    })
+    
+    alert.addAction(UIAlertAction(title: "Cancel", style: .cancel) { _ in
+        self.navigationController?.popViewController(animated: true)
+    })
+    
+    present(alert, animated: true)
+}
+</code></pre>
+</div>
+`,
+        relatedSuggestionsQuery: 'iOS checkout loading states payment processing UX',
+    },
+    {
+        id: 'payment-success',
+        figmaNodeId: '100:279', // Payment Success node ID
+        title: 'Payment Success',
+        iconName: 'BookOpen',
+        content: `
+<h1 class="font-headline text-3xl mb-4">Payment Success</h1>
+`,
+        relatedSuggestionsQuery: 'iOS payment success confirmation UX',
+    },
+
 ];
 
 // export const FIGMA_PROTOTYPE_URL = "https://www.figma.com/proto/Qy1SqTQFBGy0MbDona2oA5/Finance-Management-Mobile-App-UI-UX-Kit-for-Budget-Tracker-Financial-Prototype-Design--Community-?node-id=7113-2955&starting-point-node-id=7113%3A2955&scaling=contain&hide-ui=1&hotspot-hints=false&show-proto-sidebar=false&footer=false&viewport-controls=false";
