@@ -6,6 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Eye } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import APIDocumentationExample from './APIDocumentationExample';
+import ShoppingCartAPIExample from './ShoppingCartAPIExample';
+import { CartTypewriterDemo } from './CartTypewriterDemo';
 
 const DocumentationDisplay: React.FC = () => {
   const { currentDocSection, navigateToFigmaNode } = useAppContext();
@@ -20,34 +23,38 @@ const DocumentationDisplay: React.FC = () => {
     );
   }
 
+  // Function to render content with React components
+  const renderContent = (content: string) => {
+    // Split content by React component tags
+    const parts = content.split(/(<\w+(?:APIExample|Demo)\/>)/);
+
+    return parts.map((part, index) => {
+      if (part === '<APIDocumentationExample/>') {
+        return <APIDocumentationExample key={index} />;
+      } else if (part === '<ShoppingCartAPIExample/>') {
+        return <ShoppingCartAPIExample key={index} />;
+      } else if (part === '<CartTypewriterDemo/>') {
+        return <CartTypewriterDemo key={index} />;
+      } else if (part.trim()) {
+        // Render HTML content
+        return (
+          <div
+            key={index}
+            className="prose prose-sm max-w-none"
+            dangerouslySetInnerHTML={{ __html: part }}
+          />
+        );
+      }
+      return null;
+    });
+  };
+
   // Display the actual documentation content
   return (
     <Card className="w-full h-full flex flex-col shadow-sm border-gray-200 overflow-hidden rounded-none">
-      <CardHeader className="border-b border-gray-200 bg-white shrink-0">
-        <div className="flex justify-between items-center">
-          <div>
-            <CardTitle className="font-headline text-xl text-gray-900">{currentDocSection.title}</CardTitle>
-            <CardDescription className="text-gray-600">iOS SDK Documentation</CardDescription>
-          </div>
-          {currentDocSection.figmaNodeId && (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => navigateToFigmaNode(currentDocSection.figmaNodeId)}
-              className="bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
-            >
-              <Eye className="mr-2 h-4 w-4" />
-              View in Prototype
-            </Button>
-          )}
-        </div>
-      </CardHeader>
       <ScrollArea className="flex-grow bg-white">
         <CardContent className="pt-6">
-          <div 
-            className="prose prose-sm max-w-none"
-            dangerouslySetInnerHTML={{ __html: currentDocSection.content }}
-          />
+          {renderContent(currentDocSection.content)}
         </CardContent>
       </ScrollArea>
     </Card>

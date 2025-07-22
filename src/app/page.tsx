@@ -64,12 +64,12 @@ const DocuProtoContent = () => {
           </div>
         </div>
       </div>
-      
-      {/* Navigation Buttons */}
-      <div className="absolute bottom-6 left-6">
-        <button 
+
+      {/* Navigation Buttons - Always on Top Layer */}
+      <div className="fixed bottom-6 left-6 z-[9999] pointer-events-none">
+        <button
           onClick={handleBackClick}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-lg transition-colors duration-200 flex items-center gap-2"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200 flex items-center gap-2 pointer-events-auto backdrop-blur-sm border border-blue-500/20"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -77,11 +77,11 @@ const DocuProtoContent = () => {
           <span className="font-medium">BACK</span>
         </button>
       </div>
-      
-      <div className="absolute bottom-6 right-6">
-        <button 
+
+      <div className="fixed bottom-6 right-6 z-[9999] pointer-events-none">
+        <button
           onClick={handleNextClick}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-lg transition-colors duration-200 flex items-center gap-2"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200 flex items-center gap-2 pointer-events-auto backdrop-blur-sm border border-blue-500/20"
         >
           <span className="font-medium">NEXT</span>
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
