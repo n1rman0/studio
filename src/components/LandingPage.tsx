@@ -30,7 +30,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNext }) => {
       {/* Main Content Container */}
       <div className="flex min-h-screen">
         {/* Left Side - Content */}
-        <div className="flex-1 flex flex-col justify-center px-8 lg:px-16 max-w-2xl">
+        <div className="w-[60%] flex flex-col justify-center px-8 lg:px-16">
           <div className="space-y-6">
             <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 leading-tight">
               Welcome to the new{' '}
@@ -67,7 +67,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNext }) => {
         </div>
 
         {/* Right Side - Visual Pattern */}
-        <div className="flex-1 relative bg-gradient-to-b from-blue-400 to-blue-600 overflow-hidden">
+        <div className="w-[40%] relative bg-gradient-to-b from-blue-400 to-blue-600 overflow-hidden">
           {/* City Skyline Pattern */}
           <div className="absolute inset-0 opacity-30">
             <svg width="100%" height="100%" viewBox="0 0 800 600" className="absolute bottom-0">
