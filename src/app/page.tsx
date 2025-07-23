@@ -14,7 +14,8 @@ const DocuProtoContent = () => {
 
   const handleBackClick = () => {
     if (!showLanding) {
-      navigateBackward();
+      // Go back to landing page instead of navigating within Figma
+      setShowLanding(true);
     }
   };
 
@@ -43,7 +44,8 @@ const DocuProtoContent = () => {
         case 'ArrowLeft':
           event.preventDefault();
           if (!showLanding) {
-            navigateBackward();
+            // Go back to landing page instead of navigating within Figma
+            setShowLanding(true);
           }
           break;
         case 'ArrowRight':
@@ -64,7 +66,7 @@ const DocuProtoContent = () => {
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [navigateBackward, navigateToFigmaNode, showLanding]);
+  }, [navigateForward, showLanding]);
 
   // Show landing page
   if (showLanding) {
