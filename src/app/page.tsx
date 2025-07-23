@@ -5,17 +5,29 @@ import EventDisplay from '@/components/docuproto/ContextualSuggestions';
 import DocumentationDisplay from '@/components/docuproto/DocumentationDisplay';
 import FigmaEmbed from '@/components/docuproto/FigmaEmbed';
 import TopNavigation from '@/components/docuproto/TopNavigation';
-import { useEffect } from 'react';
+import LandingPage from '@/components/LandingPage';
+import { useEffect, useState } from 'react';
 
 const DocuProtoContent = () => {
   const { navigateForward, navigateBackward, navigateToFigmaNode } = useAppContext();
+  const [showLanding, setShowLanding] = useState(true);
 
   const handleBackClick = () => {
-    navigateBackward();
+    if (!showLanding) {
+      navigateBackward();
+    }
   };
 
   const handleNextClick = () => {
-    navigateForward();
+    if (showLanding) {
+      setShowLanding(false);
+    } else {
+      navigateForward();
+    }
+  };
+
+  const handleLandingNext = () => {
+    setShowLanding(false);
   };
 
   // Add keyboard navigation
@@ -30,11 +42,17 @@ const DocuProtoContent = () => {
       switch (event.key) {
         case 'ArrowLeft':
           event.preventDefault();
-          navigateBackward();
+          if (!showLanding) {
+            navigateBackward();
+          }
           break;
         case 'ArrowRight':
           event.preventDefault();
-          navigateForward();
+          if (showLanding) {
+            setShowLanding(false);
+          } else {
+            navigateForward();
+          }
           break;
       }
     };
@@ -46,7 +64,12 @@ const DocuProtoContent = () => {
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [navigateBackward, navigateToFigmaNode]);
+  }, [navigateBackward, navigateToFigmaNode, showLanding]);
+
+  // Show landing page
+  if (showLanding) {
+    return <LandingPage onNext={handleLandingNext} />;
+  }
 
   return (
     <div className="min-h-screen bg-background relative">

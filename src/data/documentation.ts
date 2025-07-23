@@ -25,27 +25,28 @@ export const IOS_DOCUMENTATION: DocSection[] = [
         iconName: 'BookOpen',
         content: `
 <h1 class="font-headline text-3xl mb-4">Shopping Cart Implementation</h1>
-<p class="mb-2">Learn how to implement a robust shopping cart system in your iOS app with our e-commerce SDK.</p>
+<p class="mb-2">Learn how to implement a robust shopping cart system in your iOS app with Razorpay's comprehensive e-commerce SDK.</p>
 <h2 class="font-headline text-2xl mt-4 mb-2">Cart Management</h2>
 <div class="bg-muted p-4 rounded-md my-4">
 <pre><code class="font-code text-sm">
 import RazorpaySDK
 
-// Initialize cart
-let cart = ShoppingCart()
+// Initialize cart with Razorpay
+let cart = RazorpayCart()
 
 // Add items to cart
-let product = Product(id: "123", name: "iPhone Case", price: 29.99)
+let product = Product(id: "prod_123", name: "iPhone Case", price: 2999) // Price in paise
 cart.addItem(product, quantity: 2)
 
 // Update quantity
-cart.updateQuantity(productId: "123", quantity: 3)
+cart.updateQuantity(productId: "prod_123", quantity: 3)
 
 // Remove item
-cart.removeItem(productId: "123")
+cart.removeItem(productId: "prod_123")
 
-// Get cart total
-let total = cart.getTotalPrice()
+// Get cart total in paise
+let totalInPaise = cart.getTotalPrice()
+let totalInRupees = totalInPaise / 100
 </code></pre>
 </div>
 <h2 class="font-headline text-2xl mt-4 mb-2">Cart Persistence</h2>
@@ -81,30 +82,32 @@ let savedCart = ShoppingCart.loadFromStorage()
         title: 'Checkout Process',
         iconName: 'BookOpen',
         content: `
-<h1 class="font-headline text-3xl mb-4">Implementing Secure Checkout</h1>
-<p class="mb-2">Complete the purchase flow with our secure checkout implementation supporting multiple payment methods.</p>
+<h1 class="font-headline text-3xl mb-4">Implementing Secure Checkout with Razorpay</h1>
+<p class="mb-2">Complete the purchase flow with Razorpay's secure checkout implementation supporting multiple payment methods.</p>
 <h2 class="font-headline text-2xl mt-4 mb-2">Checkout Flow</h2>
 <div class="bg-muted p-4 rounded-md my-4">
 <pre><code class="font-code text-sm">
 <APIDocumentationExample/>
-import PaymentSDK
+import RazorpaySDK
 
 class CheckoutViewController: UIViewController {
     
     func initiateCheckout() {
-        let checkoutData = CheckoutData(
-            cart: currentCart,
-            shippingAddress: userShippingAddress,
-            billingAddress: userBillingAddress
+        let options = RazorpayOptions(
+            amount: currentCart.getTotalPrice(), // Amount in paise
+            currency: "INR",
+            orderId: "order_\(UUID().uuidString)",
+            name: "Your App Name",
+            description: "Purchase from cart"
         )
         
-        PaymentSDK.shared.presentCheckout(
-            with: checkoutData,
+        RazorpaySDK.shared.presentCheckout(
+            with: options,
             from: self
         ) { [weak self] result in
             switch result {
-            case .success(let transaction):
-                self?.handleSuccessfulPayment(transaction)
+            case .success(let payment):
+                self?.handleSuccessfulPayment(payment)
             case .failure(let error):
                 self?.handlePaymentError(error)
             case .cancelled:
@@ -113,24 +116,26 @@ class CheckoutViewController: UIViewController {
         }
     }
     
-    private func handleSuccessfulPayment(_ transaction: Transaction) {
+    private func handleSuccessfulPayment(_ payment: RazorpayPayment) {
         // Clear cart
-        ShoppingCart.shared.clear()
+        RazorpayCart.shared.clear()
         
         // Show success screen
-        let successVC = OrderConfirmationViewController(transaction: transaction)
+        let successVC = OrderConfirmationViewController(payment: payment)
         navigationController?.pushViewController(successVC, animated: true)
     }
 }
 </code></pre>
 </div>
-<h2 class="font-headline text-2xl mt-4 mb-2">Payment Methods</h2>
-<p class="mb-2">Support multiple payment options including Apple Pay, credit cards, and digital wallets.</p>
+<h2 class="font-headline text-2xl mt-4 mb-2">Supported Payment Methods</h2>
+<p class="mb-2">Razorpay supports 100+ payment methods popular in India and globally.</p>
 <ul class="list-disc pl-5 space-y-1 mb-4">
-  <li>Apple Pay integration</li>
-  <li>Credit/Debit cards (Stripe, Square)</li>
-  <li>PayPal and digital wallets</li>
-  <li>Buy now, pay later options</li>
+  <li>UPI (Google Pay, PhonePe, Paytm, BHIM)</li>
+  <li>Credit/Debit cards (Visa, Mastercard, RuPay)</li>
+  <li>Net Banking (All major banks)</li>
+  <li>Digital Wallets (Paytm, Mobikwik, Freecharge)</li>
+  <li>Buy now, pay later (Simpl, LazyPay)</li>
+  <li>International cards and wallets</li>
 </ul>
 `,
         relatedSuggestionsQuery: 'iOS secure checkout implementation payment methods',
