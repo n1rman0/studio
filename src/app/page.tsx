@@ -5,6 +5,7 @@ import EventDisplay from '@/components/docuproto/ContextualSuggestions';
 import DocumentationDisplay from '@/components/docuproto/DocumentationDisplay';
 import FigmaEmbed from '@/components/docuproto/FigmaEmbed';
 import TopNavigation from '@/components/docuproto/TopNavigation';
+import ProgressBar from '@/components/docuproto/ProgressBar';
 import LandingPage from '@/components/LandingPage';
 import { useEffect, useState } from 'react';
 
@@ -76,7 +77,13 @@ const DocuProtoContent = () => {
   return (
     <div className="min-h-screen bg-background relative">
       <TopNavigation />
-      <div className="flex flex-col lg:flex-row h-[calc(100vh-3.5rem)] overflow-hidden">
+      {/* Progress Bar - only show when not on landing page */}
+      {!showLanding && (
+        <div className="border-b bg-white px-4 py-3">
+          <ProgressBar />
+        </div>
+      )}
+      <div className={`flex flex-col lg:flex-row ${showLanding ? 'h-[calc(100vh-3.5rem)]' : 'h-[calc(100vh-7rem)]'} overflow-hidden`}>
         <div className="w-full lg:w-1/2 p-1 sm:p-2 md:p-4 h-1/2 lg:h-full overflow-hidden">
           <FigmaEmbed />
         </div>
