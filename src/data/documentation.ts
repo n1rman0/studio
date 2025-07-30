@@ -92,9 +92,48 @@ export const IOS_DOCUMENTATION: DocSection[] = [
         title: 'Payment Success',
         iconName: 'BookOpen',
         content: `
-<h1 class="font-headline text-3xl mb-4">Payment Success</h1>
+<h1 class="font-headline text-3xl mb-4">Payment Success Implementation</h1>
+<p class="mb-2">Create a delightful and informative payment success experience that builds customer confidence and provides essential order information.</p>
+
+<h2 class="font-headline text-2xl mt-4 mb-2">Success Page Components</h2>
+<p class="mb-2">A comprehensive payment success page should include these key elements:</p>
+<ul class="list-disc pl-5 space-y-1 mb-4">
+  <li>Clear success confirmation with visual feedback (checkmark, animation)</li>
+  <li>Order summary with item details and total amount</li>
+  <li>Payment method used and transaction ID</li>
+  <li>Estimated delivery date and tracking information</li>
+  <li>Next steps and account management options</li>
+</ul>
+
+<PaymentSuccessSnippet/>
+
+<h2 class="font-headline text-2xl mt-4 mb-2">Post-Payment Actions</h2>
+<p class="mb-2">Implement these actions immediately after successful payment:</p>
+<ul class="list-disc pl-5 space-y-1 mb-4">
+  <li>Clear the shopping cart</li>
+  <li>Send confirmation email/SMS to customer</li>
+  <li>Update inventory and order management systems</li>
+  <li>Initialize order tracking</li>
+  <li>Trigger analytics events for conversion tracking</li>
+</ul>
+
+<PostPaymentActionsSnippet/>
+
+<h2 class="font-headline text-2xl mt-4 mb-2">User Experience Best Practices</h2>
+<p class="mb-2">Follow these UX guidelines for an optimal payment success experience:</p>
+<ul class="list-disc pl-5 space-y-1 mb-4">
+  <li>Show immediate visual confirmation (animation, confetti, checkmark)</li>
+  <li>Provide clear order reference number for future support</li>
+  <li>Include "Continue Shopping" and "View Orders" action buttons</li>
+  <li>Offer account creation for guest checkout users</li>
+  <li>Display expected delivery timeline prominently</li>
+</ul>
+
+<h2 class="font-headline text-2xl mt-4 mb-2">Error Recovery</h2>
+<p class="mb-2">Handle edge cases where payment succeeds but order processing fails:</p>
+<OrderRecoverySnippet/>
 `,
-        relatedSuggestionsQuery: 'iOS payment success confirmation UX',
+        relatedSuggestionsQuery: 'iOS payment success confirmation UX order management',
     },
 
 ];
