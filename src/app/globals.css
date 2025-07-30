@@ -115,8 +115,12 @@ body {
   font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
   font-size: 13px;
   line-height: 1.5;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   position: relative;
+  width: 100%;
+  min-width: 0; /* Allow shrinking */
+  max-width: 100%;
   /* Graph paper grid background with 80px squares */
   background-image: 
     linear-gradient(to right, hsl(var(--api-line-number-bg)) 0, hsl(var(--api-line-number-bg)) 48px, transparent 48px),
@@ -168,13 +172,15 @@ body {
 
 .api-json-content {
   padding: 16px 16px 16px 8px;
-  overflow-x: auto;
+  overflow-x: visible;
   white-space: pre;
   font-feature-settings: 'liga' 0;
   color: #24292e;
   background: transparent;
   position: relative;
   z-index: 2;
+  width: 100%;
+  min-width: max-content; /* Ensure content is fully visible */
 }
 
 /* JSON Syntax highlighting */

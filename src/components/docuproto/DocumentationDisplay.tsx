@@ -62,8 +62,10 @@ const DocumentationDisplay: React.FC = () => {
   return (
     <Card className="w-full h-full flex flex-col shadow-sm border-gray-200 overflow-hidden rounded-none">
       <ScrollArea className="flex-grow bg-white">
-        <CardContent className="pt-6">
-          {renderContent(currentDocSection.content)}
+        <CardContent className="pt-6 px-6 pb-8">
+          <div className="w-full overflow-hidden">
+            {renderContent(currentDocSection.content)}
+          </div>
         </CardContent>
       </ScrollArea>
     </Card>

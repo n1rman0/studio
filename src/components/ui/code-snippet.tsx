@@ -76,28 +76,30 @@ const CodeSnippet: React.FC<CodeSnippetProps> = ({
   };
 
   return (
-    <div className={cn("relative my-4", className)}>
+    <div className={cn("relative my-4 w-full", className)}>
       {title && (
         <div className="mb-2">
           <h4 className="text-sm font-medium text-gray-700">{title}</h4>
         </div>
       )}
-      <div className="relative">
+      <div className="relative w-full overflow-hidden">
         {copyable && (
           <Button
             variant="ghost"
             size="sm"
-            className="api-copy-button"
+            className="absolute top-2 right-2 sm:top-3 sm:right-3 z-20 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-md p-1.5 sm:p-2 opacity-70 hover:opacity-100 transition-all duration-200 hover:bg-white/95 hover:shadow-sm hover:scale-105"
             onClick={copyToClipboard}
           >
             {copied ? (
-              <Check className="h-4 w-4 text-green-600" />
+              <Check className="h-3 w-3 text-green-600" />
             ) : (
-              <Copy className="h-4 w-4 text-gray-500" />
+              <Copy className="h-3 w-3 text-gray-500" />
             )}
           </Button>
         )}
-        {renderCodeWithLineNumbers()}
+        <div className="w-full overflow-x-auto">
+          {renderCodeWithLineNumbers()}
+        </div>
       </div>
     </div>
   );
