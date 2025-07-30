@@ -3,7 +3,7 @@
 import { AppContextProvider, useAppContext } from '@/components/docuproto/AppContextProvider';
 import EventDisplay from '@/components/docuproto/ContextualSuggestions';
 import DocumentationDisplay from '@/components/docuproto/DocumentationDisplay';
-import FigmaEmbed from '@/components/docuproto/FigmaEmbed';
+import FigmaLoaderV2 from '@/components/docuproto/FigmaLoaderV2';
 import TopNavigation from '@/components/docuproto/TopNavigation';
 import ProgressBar from '@/components/docuproto/ProgressBar';
 import LandingPage from '@/components/LandingPage';
@@ -111,7 +111,7 @@ const DocuProtoContent = () => {
       )}
       <div className={`flex flex-col lg:flex-row ${showLanding ? 'h-[calc(100vh-3.5rem)]' : 'h-[calc(100vh-7rem)]'} overflow-hidden`}>
         <div className="w-full lg:w-1/2 p-1 sm:p-2 md:p-4 h-1/2 lg:h-full overflow-hidden">
-          <FigmaEmbed />
+          <FigmaLoaderV2 />
         </div>
         <div className="w-full lg:w-1/2 flex flex-col h-1/2 lg:h-full overflow-hidden">
           <div className="flex-grow overflow-hidden">

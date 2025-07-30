@@ -1,29 +1,35 @@
 "use client";
 
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 import { useAppContext } from './AppContextProvider';
 import { FIGMA_FILE_KEY, FIGMA_CLIENT_ID, IOS_DOCUMENTATION } from '@/data/documentation';
 import DeviceWrapper from './DeviceWrapper';
 
-const FigmaEmbed: React.FC = () => {
+const FigmaLoaderV2: React.FC = () => {
   const { setCurrentDocSectionById, figmaIframeRef, setIsFigmaReady, addInteraction, isFigmaReady } = useAppContext();
+  const [isPreloading, setIsPreloading] = useState(true);
+  const [showMainInterface, setShowMainInterface] = useState(false);
 
   const handleFigmaMessage = useCallback((event: MessageEvent) => {
-    // Validate origin for security
     if (event.origin !== "https://www.figma.com") return;
 
     const { data } = event;
     if (!data || typeof data !== 'object') return;
 
-    console.log("Figma Embed Kit 2.0 message received:", data);
+    console.log("Figma V2 message received:", data);
 
     try {
       switch (data.type) {
         case "INITIAL_LOAD":
-          // Initial load is now handled by FigmaPreloader
-          // This component handles UI interactions after preloading
-          addInteraction("Main prototype interface ready");
-          console.log("Figma Embed Kit 2.0: Main prototype interface ready");
+          console.log("✅ Figma loaded and ready - transitioning to main interface");
+          setIsFigmaReady(true);
+          setIsPreloading(false);
+          addInteraction("Prototype loaded and ready");
+          
+          // Small delay to ensure smooth transition
+          setTimeout(() => {
+            setShowMainInterface(true);
+          }, 100);
           break;
 
         case "PRESENTED_NODE_CHANGED":
@@ -77,18 +83,15 @@ const FigmaEmbed: React.FC = () => {
     } catch (error) {
       console.error("Error handling Figma message:", error);
     }
-  }, [setIsFigmaReady, setCurrentDocSectionById, addInteraction]);
+  }, [setCurrentDocSectionById, setIsFigmaReady, addInteraction]);
 
   useEffect(() => {
     window.addEventListener('message', handleFigmaMessage);
-
     return () => {
       window.removeEventListener('message', handleFigmaMessage);
     };
   }, [handleFigmaMessage]);
 
-  // Embed Kit 2.0 URL - Enhanced with official parameters for better UX
-  // Based on official documentation: https://www.figma.com/developers/embed
   const embedSrc = `https://embed.figma.com/proto/${FIGMA_FILE_KEY}?embed-host=docuproto&client-id=${FIGMA_CLIENT_ID}&footer=false&hotspot-hints=false&theme=light&viewport-controls=false&disable-default-keyboard-nav=true&page-selector=false&hide-ui=true&scaling=fit`;
 
   return (
@@ -101,8 +104,9 @@ const FigmaEmbed: React.FC = () => {
       }}
     >
       <DeviceWrapper>
-        {!isFigmaReady && (
-          <div className="w-full h-full flex items-center justify-center bg-gray-50">
+        {/* Preloading State - Hidden but iframe is actively loading */}
+        {isPreloading && (
+          <div className="w-full h-full flex items-center justify-center bg-gray-50 absolute inset-0 z-10">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
               <p className="text-gray-600 font-medium">Loading Figma Prototype...</p>
@@ -110,6 +114,8 @@ const FigmaEmbed: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* Single iframe - starts loading immediately, then becomes visible */}
         <iframe
           ref={figmaIframeRef}
           id="embed-frame"
@@ -119,20 +125,20 @@ const FigmaEmbed: React.FC = () => {
             height: '100%',
             border: 'none',
             background: 'transparent',
-            display: isFigmaReady ? 'block' : 'none',
+            opacity: showMainInterface ? 1 : 0,
+            transition: 'opacity 0.3s ease-in-out',
             overflow: 'hidden',
             transform: 'scale(1)',
             transformOrigin: 'top left'
           }}
           src={embedSrc}
-          title="Figma Prototype - Embed Kit 2.0"
+          title="Figma Prototype - V2 Single Instance"
           sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-presentation"
           allow="clipboard-read; clipboard-write"
-          loading="lazy"
-        ></iframe>
+        />
       </DeviceWrapper>
     </div>
   );
 };
 
-export default FigmaEmbed;
+export default FigmaLoaderV2; 
