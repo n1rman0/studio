@@ -9,6 +9,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import APIDocumentationExample from './APIDocumentationExample';
 import ShoppingCartAPIExample from './ShoppingCartAPIExample';
 import { CartTypewriterDemo } from './CartTypewriterDemo';
+import { CartImplementationSnippet, CartPersistenceSnippet, CheckoutFlowSnippet, ErrorHandlingSnippet } from './EmbeddedCodeSnippet';
 
 const DocumentationDisplay: React.FC = () => {
   const { currentDocSection, navigateToFigmaNode } = useAppContext();
@@ -26,7 +27,7 @@ const DocumentationDisplay: React.FC = () => {
   // Function to render content with React components
   const renderContent = (content: string) => {
     // Split content by React component tags
-    const parts = content.split(/(<\w+(?:APIExample|Demo)\/>)/);
+    const parts = content.split(/(<\w+(?:APIExample|Demo|Snippet)\/>)/);
 
     return parts.map((part, index) => {
       if (part === '<APIDocumentationExample/>') {
@@ -35,6 +36,14 @@ const DocumentationDisplay: React.FC = () => {
         return <ShoppingCartAPIExample key={index} />;
       } else if (part === '<CartTypewriterDemo/>') {
         return <CartTypewriterDemo key={index} />;
+      } else if (part === '<CartImplementationSnippet/>') {
+        return <CartImplementationSnippet key={index} />;
+      } else if (part === '<CartPersistenceSnippet/>') {
+        return <CartPersistenceSnippet key={index} />;
+      } else if (part === '<CheckoutFlowSnippet/>') {
+        return <CheckoutFlowSnippet key={index} />;
+      } else if (part === '<ErrorHandlingSnippet/>') {
+        return <ErrorHandlingSnippet key={index} />;
       } else if (part.trim()) {
         // Render HTML content
         return (

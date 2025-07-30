@@ -27,39 +27,10 @@ export const IOS_DOCUMENTATION: DocSection[] = [
 <h1 class="font-headline text-3xl mb-4">Shopping Cart Implementation</h1>
 <p class="mb-2">Learn how to implement a robust shopping cart system in your iOS app with Razorpay's comprehensive e-commerce SDK.</p>
 <h2 class="font-headline text-2xl mt-4 mb-2">Cart Management</h2>
-<div class="bg-muted p-4 rounded-md my-4">
-<pre><code class="font-code text-sm">
-import RazorpaySDK
-
-// Initialize cart with Razorpay
-let cart = RazorpayCart()
-
-// Add items to cart
-let product = Product(id: "prod_123", name: "iPhone Case", price: 2999) // Price in paise
-cart.addItem(product, quantity: 2)
-
-// Update quantity
-cart.updateQuantity(productId: "prod_123", quantity: 3)
-
-// Remove item
-cart.removeItem(productId: "prod_123")
-
-// Get cart total in paise
-let totalInPaise = cart.getTotalPrice()
-let totalInRupees = totalInPaise / 100
-</code></pre>
-</div>
+<CartImplementationSnippet/>
 <h2 class="font-headline text-2xl mt-4 mb-2">Cart Persistence</h2>
 <p class="mb-2">The cart automatically persists data locally using Core Data, ensuring user's cart survives app restarts.</p>
-<div class="bg-muted p-4 rounded-md my-4">
-<pre><code class="font-code text-sm">
-// Save cart to persistent storage
-cart.save()
-
-// Load existing cart
-let savedCart = ShoppingCart.loadFromStorage()
-</code></pre>
-</div>
+<CartPersistenceSnippet/>
 `,
         relatedSuggestionsQuery: 'iOS shopping cart implementation best practices',
     },
@@ -85,48 +56,7 @@ let savedCart = ShoppingCart.loadFromStorage()
 <h1 class="font-headline text-3xl mb-4">Implementing Secure Checkout with Razorpay</h1>
 <p class="mb-2">Complete the purchase flow with Razorpay's secure checkout implementation supporting multiple payment methods.</p>
 <h2 class="font-headline text-2xl mt-4 mb-2">Checkout Flow</h2>
-<div class="bg-muted p-4 rounded-md my-4">
-<pre><code class="font-code text-sm">
-<APIDocumentationExample/>
-import RazorpaySDK
-
-class CheckoutViewController: UIViewController {
-    
-    func initiateCheckout() {
-        let options = RazorpayOptions(
-            amount: currentCart.getTotalPrice(), // Amount in paise
-            currency: "INR",
-            orderId: "order_\(UUID().uuidString)",
-            name: "Your App Name",
-            description: "Purchase from cart"
-        )
-        
-        RazorpaySDK.shared.presentCheckout(
-            with: options,
-            from: self
-        ) { [weak self] result in
-            switch result {
-            case .success(let payment):
-                self?.handleSuccessfulPayment(payment)
-            case .failure(let error):
-                self?.handlePaymentError(error)
-            case .cancelled:
-                self?.handlePaymentCancellation()
-            }
-        }
-    }
-    
-    private func handleSuccessfulPayment(_ payment: RazorpayPayment) {
-        // Clear cart
-        RazorpayCart.shared.clear()
-        
-        // Show success screen
-        let successVC = OrderConfirmationViewController(payment: payment)
-        navigationController?.pushViewController(successVC, animated: true)
-    }
-}
-</code></pre>
-</div>
+<CheckoutFlowSnippet/>
 <h2 class="font-headline text-2xl mt-4 mb-2">Supported Payment Methods</h2>
 <p class="mb-2">Razorpay supports 100+ payment methods popular in India and globally.</p>
 <ul class="list-disc pl-5 space-y-1 mb-4">
@@ -152,27 +82,7 @@ class CheckoutViewController: UIViewController {
 </div>
 <h2 class="font-headline text-2xl mt-4 mb-2">Error Handling During Loading</h2>
 <p class="mb-2">Gracefully handle errors and provide clear feedback when checkout operations fail.</p>
-<div class="bg-muted p-4 rounded-md my-4">
-<pre><code class="font-code text-sm">
-private func showErrorState(_ error: PaymentError) {
-    let alert = UIAlertController(
-        title: "Payment Failed",
-        message: error.localizedDescription,
-        preferredStyle: .alert
-    )
-    
-    alert.addAction(UIAlertAction(title: "Try Again", style: .default) { _ in
-        self.processPayment()
-    })
-    
-    alert.addAction(UIAlertAction(title: "Cancel", style: .cancel) { _ in
-        self.navigationController?.popViewController(animated: true)
-    })
-    
-    present(alert, animated: true)
-}
-</code></pre>
-</div>
+<ErrorHandlingSnippet/>
 `,
         relatedSuggestionsQuery: 'iOS checkout loading states payment processing UX',
     },
