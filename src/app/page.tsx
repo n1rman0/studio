@@ -7,11 +7,21 @@ import FigmaEmbed from '@/components/docuproto/FigmaEmbed';
 import TopNavigation from '@/components/docuproto/TopNavigation';
 import ProgressBar from '@/components/docuproto/ProgressBar';
 import LandingPage from '@/components/LandingPage';
+import CongratulationsModal from '@/components/docuproto/CongratulationsModal';
 import { useEffect, useState } from 'react';
+import { IOS_DOCUMENTATION } from '@/data/documentation';
 
 const DocuProtoContent = () => {
-  const { navigateForward, navigateBackward, navigateToFigmaNode } = useAppContext();
+  const { navigateForward, navigateBackward, navigateToFigmaNode, currentDocSection, restartPrototype } = useAppContext();
   const [showLanding, setShowLanding] = useState(true);
+  const [showCongratulations, setShowCongratulations] = useState(false);
+
+  // Calculate if we're on the last step
+  const totalSteps = IOS_DOCUMENTATION.length;
+  const currentStepIndex = currentDocSection 
+    ? IOS_DOCUMENTATION.findIndex(section => section.id === currentDocSection.id)
+    : 0;
+  const isLastStep = currentStepIndex === totalSteps - 1;
 
   const handleBackClick = () => {
     if (!showLanding) {
@@ -23,6 +33,9 @@ const DocuProtoContent = () => {
   const handleNextClick = () => {
     if (showLanding) {
       setShowLanding(false);
+    } else if (isLastStep) {
+      // Show congratulations modal instead of navigating forward
+      setShowCongratulations(true);
     } else {
       navigateForward();
     }
@@ -30,6 +43,16 @@ const DocuProtoContent = () => {
 
   const handleLandingNext = () => {
     setShowLanding(false);
+  };
+
+  const handleCongratulationsClose = () => {
+    setShowCongratulations(false);
+  };
+
+  const handleRestart = () => {
+    setShowCongratulations(false);
+    setShowLanding(true);
+    restartPrototype();
   };
 
   // Add keyboard navigation
@@ -53,6 +76,9 @@ const DocuProtoContent = () => {
           event.preventDefault();
           if (showLanding) {
             setShowLanding(false);
+          } else if (isLastStep) {
+            // Show congratulations modal instead of navigating forward
+            setShowCongratulations(true);
           } else {
             navigateForward();
           }
@@ -67,7 +93,7 @@ const DocuProtoContent = () => {
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [navigateForward, showLanding]);
+  }, [navigateForward, showLanding, isLastStep]);
 
   // Show landing page
   if (showLanding) {
@@ -115,12 +141,19 @@ const DocuProtoContent = () => {
           onClick={handleNextClick}
           className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200 flex items-center gap-2 pointer-events-auto backdrop-blur-sm border border-blue-500/20"
         >
-          <span className="font-medium">NEXT</span>
+          <span className="font-medium">{isLastStep ? 'FINISH' : 'NEXT'}</span>
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </button>
       </div>
+
+      {/* Congratulations Modal */}
+      <CongratulationsModal
+        isOpen={showCongratulations}
+        onClose={handleCongratulationsClose}
+        onRestart={handleRestart}
+      />
     </div>
   );
 };
