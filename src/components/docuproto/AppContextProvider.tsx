@@ -29,7 +29,7 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const currentDocSection = IOS_DOCUMENTATION.find(section => section.id === currentDocSectionId) || null;
 
   const addInteraction = useCallback((interaction: string) => {
-    setInteractionHistory(prev => [...prev, interaction].slice(-5)); // Keep last 5 interactions
+    setInteractionHistory(prev => [...prev, interaction].slice(-5));
   }, []);
   
   const setCurrentDocSectionById = useCallback((id: string | null) => {
@@ -46,62 +46,38 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   }, [currentDocSectionId, setCurrentDocSectionById]);
 
-
+  // Map figma node id to local section id and navigate
   const navigateToFigmaNode = useCallback((nodeId: string) => {
-    console.log("Navigating to Figma node:", nodeId);
-    console.log("Figma iframe ref:", figmaIframeRef.current);
-    console.log("Figma iframe content window:", figmaIframeRef.current?.contentWindow);
-    console.log("Is Figma ready:", isFigmaReady);
-    if (figmaIframeRef.current && figmaIframeRef.current.contentWindow && isFigmaReady) {
-      figmaIframeRef.current.contentWindow.postMessage(
-        {
-          type: 'NAVIGATE_TO_FRAME_AND_CLOSE_OVERLAYS',
-          data: { nodeId }
-        },
-        'https://www.figma.com'
-      );
-    } else {
-      console.warn("Figma iframe not ready or not available for navigation command.");
+    const match = IOS_DOCUMENTATION.find(s => s.figmaNodeId === nodeId);
+    if (match) {
+      setCurrentDocSectionById(match.id);
     }
-  }, [isFigmaReady]);
+  }, [setCurrentDocSectionById]);
 
   const navigateForward = useCallback(() => {
-    console.log('Navigating forward');
-    if (figmaIframeRef.current && figmaIframeRef.current.contentWindow && isFigmaReady) {
-      figmaIframeRef.current.contentWindow.postMessage(
-        { type: 'NAVIGATE_FORWARD' },
-        'https://www.figma.com'
-      );
-      addInteraction('Navigated forward in prototype');
-    } else {
-      console.warn("Figma iframe not ready for forward navigation.");
+    if (!currentDocSectionId) return;
+    const idx = IOS_DOCUMENTATION.findIndex(s => s.id === currentDocSectionId);
+    if (idx >= 0 && idx < IOS_DOCUMENTATION.length - 1) {
+      setCurrentDocSectionById(IOS_DOCUMENTATION[idx + 1].id);
+      addInteraction('Navigated forward');
     }
-  }, [isFigmaReady, addInteraction]);
+  }, [currentDocSectionId, setCurrentDocSectionById, addInteraction]);
 
   const navigateBackward = useCallback(() => {
-    console.log('Navigating backward');
-    if (figmaIframeRef.current && figmaIframeRef.current.contentWindow && isFigmaReady) {
-      figmaIframeRef.current.contentWindow.postMessage(
-        { type: 'NAVIGATE_BACKWARD' },
-        'https://www.figma.com'
-      );
-      addInteraction('Navigated backward in prototype');
-    } else {
-      console.warn("Figma iframe not ready for backward navigation.");
+    if (!currentDocSectionId) return;
+    const idx = IOS_DOCUMENTATION.findIndex(s => s.id === currentDocSectionId);
+    if (idx > 0) {
+      setCurrentDocSectionById(IOS_DOCUMENTATION[idx - 1].id);
+      addInteraction('Navigated backward');
     }
-  }, [isFigmaReady, addInteraction]);
+  }, [currentDocSectionId, setCurrentDocSectionById, addInteraction]);
 
   const restartPrototype = useCallback(() => {
-    if (figmaIframeRef.current && figmaIframeRef.current.contentWindow && isFigmaReady) {
-      figmaIframeRef.current.contentWindow.postMessage(
-        { type: 'RESTART' },
-        'https://www.figma.com'
-      );
-      addInteraction('Restarted prototype');
-    } else {
-      console.warn("Figma iframe not ready for restart.");
+    if (IOS_DOCUMENTATION[0]) {
+      setCurrentDocSectionById(IOS_DOCUMENTATION[0].id);
+      addInteraction('Restarted walkthrough');
     }
-  }, [isFigmaReady, addInteraction]);
+  }, [setCurrentDocSectionById, addInteraction]);
 
   return (
     <AppContext.Provider value={{ 
