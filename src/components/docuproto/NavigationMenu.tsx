@@ -25,11 +25,10 @@ const iconMap: IconMap = {
 
 
 const NavigationMenu: React.FC = () => {
-  const { currentDocSection, setCurrentDocSectionById, navigateToFigmaNode } = useAppContext();
+  const { currentDocSection, setCurrentDocSectionById } = useAppContext();
 
-  const handleNavigation = (sectionId: string, figmaNodeId: string) => {
+  const handleNavigation = (sectionId: string) => {
     setCurrentDocSectionById(sectionId);
-    navigateToFigmaNode(figmaNodeId);
   };
 
   return (
@@ -40,7 +39,7 @@ const NavigationMenu: React.FC = () => {
           return (
             <SidebarMenuItem key={section.id}>
               <SidebarMenuButton
-                onClick={() => handleNavigation(section.id, section.figmaNodeId)}
+                onClick={() => handleNavigation(section.id)}
                 isActive={currentDocSection?.id === section.id}
                 tooltip={section.title}
                 className="text-sm font-medium h-10 px-3 rounded-md hover:bg-gray-100 data-[active=true]:bg-blue-50 data-[active=true]:text-blue-700 data-[active=true]:border-blue-200"

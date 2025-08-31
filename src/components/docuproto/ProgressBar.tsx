@@ -9,7 +9,7 @@ interface ProgressBarProps {
 }
 
 const ProgressBar: React.FC<ProgressBarProps> = ({ className = '' }) => {
-  const { currentDocSection, setCurrentDocSectionById, navigateToFigmaNode } = useAppContext();
+  const { currentDocSection, setCurrentDocSectionById } = useAppContext();
   
   // Calculate current step based on documentation sections
   const totalSteps = IOS_DOCUMENTATION.length;
@@ -67,7 +67,6 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ className = '' }) => {
                 const section = IOS_DOCUMENTATION[index];
                 if (section) {
                   setCurrentDocSectionById(section.id);
-                  navigateToFigmaNode(section.figmaNodeId);
                 }
               }}
               onKeyDown={(e) => {
@@ -76,7 +75,6 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ className = '' }) => {
                   const section = IOS_DOCUMENTATION[index];
                   if (section) {
                     setCurrentDocSectionById(section.id);
-                    navigateToFigmaNode(section.figmaNodeId);
                   }
                 }
               }}
@@ -96,13 +94,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ className = '' }) => {
         </div>
       </div>
       
-      {/* Estimated progress text */}
-      <div className="mt-2 text-xs text-foreground/50 text-center">
-        {progressPercentage < 100 
-          ? `${Math.round(progressPercentage)}% complete` 
-          : 'Journey complete! 🎉'
-        }
-      </div>
+      {/* Removed percentage text to save vertical space */}
     </div>
   );
 };

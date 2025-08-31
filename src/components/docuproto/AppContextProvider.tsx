@@ -1,21 +1,17 @@
 "use client";
 
 import type { DocSection } from '@/data/documentation';
-import React, { createContext, useState, useContext, useRef, useCallback, useEffect } from 'react';
+import React, { createContext, useState, useContext, useCallback, useEffect } from 'react';
 import { IOS_DOCUMENTATION } from '@/data/documentation';
 
 interface AppContextType {
   currentDocSection: DocSection | null;
   setCurrentDocSectionById: (id: string | null) => void;
-  navigateToFigmaNode: (nodeId: string) => void;
   navigateForward: () => void;
   navigateBackward: () => void;
   restartPrototype: () => void;
-  figmaIframeRef: React.RefObject<HTMLIFrameElement>;
   interactionHistory: string[];
   addInteraction: (interaction: string) => void;
-  isFigmaReady: boolean;
-  setIsFigmaReady: (isReady: boolean) => void;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -23,8 +19,6 @@ const AppContext = createContext<AppContextType | null>(null);
 export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentDocSectionId, setCurrentDocSectionIdState] = useState<string | null>(IOS_DOCUMENTATION[0]?.id || null);
   const [interactionHistory, setInteractionHistory] = useState<string[]>([]);
-  const figmaIframeRef = useRef<HTMLIFrameElement>(null);
-  const [isFigmaReady, setIsFigmaReady] = useState(false);
 
   const currentDocSection = IOS_DOCUMENTATION.find(section => section.id === currentDocSectionId) || null;
 
@@ -45,14 +39,6 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       setCurrentDocSectionById(IOS_DOCUMENTATION[0].id);
     }
   }, [currentDocSectionId, setCurrentDocSectionById]);
-
-  // Map figma node id to local section id and navigate
-  const navigateToFigmaNode = useCallback((nodeId: string) => {
-    const match = IOS_DOCUMENTATION.find(s => s.figmaNodeId === nodeId);
-    if (match) {
-      setCurrentDocSectionById(match.id);
-    }
-  }, [setCurrentDocSectionById]);
 
   const navigateForward = useCallback(() => {
     if (!currentDocSectionId) return;
@@ -83,15 +69,11 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     <AppContext.Provider value={{ 
         currentDocSection, 
         setCurrentDocSectionById, 
-        navigateToFigmaNode,
         navigateForward,
         navigateBackward,
         restartPrototype,
-        figmaIframeRef,
         interactionHistory,
-        addInteraction,
-        isFigmaReady,
-        setIsFigmaReady
+        addInteraction
     }}>
       {children}
     </AppContext.Provider>

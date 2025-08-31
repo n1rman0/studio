@@ -165,7 +165,7 @@ body {
   width: 48px;
   flex-shrink: 0;
   font-size: 12px;
-  line-height: 1.5;
+  line-height: 2;
   background: hsl(var(--api-line-number-bg));
   border-right: 1px solid hsl(var(--api-code-border));
 }
@@ -300,6 +300,20 @@ body {
   background: hsl(var(--foreground));
 }
 
+/* Reusable gradient overlay for code blocks */
+.code-gradient-overlay::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0; /* Start from the far left */
+  right: 0;
+  bottom: 0;
+  width: auto; /* Let it fill the space */
+  background: linear-gradient(to right, rgba(255, 255, 255, 0.8) 0%, transparent 90%); /* Fade from semi-transparent white */
+  pointer-events: none;
+  z-index: 2; /* Ensure it's above the code but below other UI elements */
+}
+
 /* Swift/iOS Code Syntax highlighting */
 .code-keyword {
   color: #af52de; /* Swift purple for keywords */
@@ -322,4 +336,63 @@ body {
 .code-type {
   color: #22863a; /* Green for types/classes */
   font-weight: 500;
+}
+
+/* Dynamic Island (Notch) styles */
+.notch-container {
+  position: absolute;
+  z-index: 60;
+  top: var(--pad);
+  left: var(--pad);
+  right: var(--pad);
+  display: flex;
+  justify-content: center;
+}
+
+.notch {
+  position: relative;
+  border-radius: var(--notch-radius, 9999px);
+  pointer-events: all;
+  overflow: hidden;
+  color: white;
+  display: flex;
+  cursor: pointer;
+  width: var(--notch-width);
+  height: var(--notch-height);
+  filter: drop-shadow(0 1em 2em rgba(0,0,0,var(--shadow-opacity, 0)));
+}
+
+.notch::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: black;
+  border-radius: inherit;
+}
+
+.camera {
+  position: absolute;
+  z-index: 70;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: var(--notch-height);
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  pointer-events: none;
+  top: calc(var(--pad) * 2);
+  right: calc(50% - calc(var(--notch-width) * 0.5));
+  margin-right: calc(var(--pad) * 0.333);
+}
+
+.camera::before {
+  content: '';
+  height: 33.3%;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0.25em #4c4da3;
+  background:
+    radial-gradient(#6667ac, transparent 50%) no-repeat 33.3% 10% / 75% 50%,
+    radial-gradient(#4f5090, transparent 50%) no-repeat 60% 85% / 50% 50%;
+  background-color: #080928;
 }

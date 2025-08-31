@@ -1,16 +1,20 @@
 "use client";
 
 import React, { useState } from 'react';
-import { ChevronLeft, Star, StarHalf, ShoppingCart, Plus, Minus } from 'lucide-react';
+import { ChevronLeft, Star, StarHalf, ShoppingCart, Plus, Minus, Lock } from 'lucide-react';
 import { useAppContext } from '../AppContextProvider';
 
-type PhoneScreenProps = { onRequestNext?: () => void; onRequestBack?: () => void; onRequestGoto?: (id: string) => void };
-const ProductDetailScreen: React.FC<PhoneScreenProps> = ({ onRequestNext, onRequestBack }) => {
+ type PhoneScreenProps = { onRequestNext?: () => void; onRequestBack?: () => void; onRequestGoto?: (id: string) => void; buyDisabled?: boolean; lockTooltip?: string };
+const ProductDetailScreen: React.FC<PhoneScreenProps> = ({ onRequestNext, onRequestBack, buyDisabled, lockTooltip }) => {
   const { addInteraction } = useAppContext();
   const [quantity, setQuantity] = useState(1);
   const [color, setColor] = useState<'orange' | 'green' | 'gray' | 'pink'>('orange');
 
   const handleBuy = () => {
+    if (buyDisabled) {
+      addInteraction('Buy Now disabled');
+      return;
+    }
     addInteraction(`Buy Now tapped (qty: ${quantity}, color: ${color})`);
     onRequestNext?.();
   };
@@ -88,10 +92,16 @@ const ProductDetailScreen: React.FC<PhoneScreenProps> = ({ onRequestNext, onRequ
       </div>
 
       {/* Buy Now */}
-      <div className="px-5 mt-5">
-        <button onClick={handleBuy} className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white rounded-xl py-3 text-[15px] font-semibold shadow">
+      <div className="px-5 mt-5 relative">
+        <button onClick={handleBuy} disabled={!!buyDisabled} className={`w-full flex items-center justify-center gap-2 rounded-xl py-3 text-[15px] font-semibold shadow ${buyDisabled ? 'bg-blue-600/50 text-white/80 cursor-not-allowed' : 'bg-blue-600 text-white'}`}>
           <ShoppingCart size={18} /> Buy Now
         </button>
+        {buyDisabled && (
+          <div className="absolute -top-2 right-6 translate-y-[-100%] flex items-center gap-1 bg-black text-white text-[10px] px-2 py-1 rounded shadow">
+            <Lock size={12} className="opacity-80" />
+            <span>{lockTooltip || 'Install Razorpay SDK to enable'}</span>
+          </div>
+        )}
         <div className="text-center text-[10px] text-slate-400 mt-2">Secured by Razorpay</div>
       </div>
     </div>

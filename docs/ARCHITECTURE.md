@@ -1,261 +1,167 @@
-# DocuProto - Architecture Documentation
+# DocuProto – Architecture
 
-## Project Overview
+## 1) System Overview
+DocuProto delivers a guided, step‑by‑step documentation experience alongside a simulated app view. The right pane renders rich documentation driven by structured JSON; the left pane visualizes the corresponding UI state (device screens or panels). A lightweight global context coordinates state and navigation.
 
-**DocuProto** is an innovative interactive documentation platform that seamlessly integrates Figma prototypes with contextual documentation. Built as a Firebase Studio project using Next.js 15 with TypeScript, it provides a sophisticated solution for displaying technical documentation alongside interactive design prototypes.
-
-### Project Purpose
-The application enables users to:
-- View interactive Figma prototypes embedded in a web application
-- Navigate synchronized documentation that corresponds to prototype states
-- Experience bi-directional navigation between prototype elements and documentation
-- Receive AI-powered contextual suggestions for relevant documentation snippets
+Key outcomes:
+- Deterministic walkthrough sourced from `integration-flow.json`
+- Clear two‑pane layout with keyboard and button navigation
+- Content updates via data, not code changes
 
 ---
 
-## Technology Stack
-
-### Core Framework
-- **Next.js 15.3.3** - React framework with App Router
-- **React 18.3.1** - Component library
-- **TypeScript 5** - Type safety and enhanced development experience
-
-### UI Framework & Styling
-- **Tailwind CSS 3.4.1** - Utility-first CSS framework
-- **Radix UI** - Headless, accessible UI components
-- **Lucide React** - Modern icon library
-- **Custom Design System** - Based on Shadcn/ui components
-
-### AI Integration
-- **Google Genkit 1.8.0** - AI flow orchestration
-- **Firebase Genkit** - Google AI integration
-- **Zod** - Schema validation for AI inputs/outputs
-
-### Development Tools
-- **ESLint** - Code linting
-- **PostCSS** - CSS processing
-- **Patch Package** - Dependency patching
+## 2) Technology Stack
+- Framework: Next.js 15.3.3 (App Router), React 18.3.1, TypeScript 5
+- Styling: Tailwind CSS 3.4.x, shadcn/radix primitives, Lucide icons
+- State: React Context via `AppContextProvider`
+- Charts/visuals: Recharts (available if needed)
+- Tooling: ESLint, PostCSS, Turbopack (dev), Patch‑Package
 
 ---
 
-## Application Architecture
-
-### High-Level Architecture
-
+## 3) High‑Level Architecture
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                        DocuProto Application                    │
-├─────────────────────────────────────────────────────────────────┤
-│  Next.js App Router Layout                                     │
-│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐ │
-│  │   Sidebar       │  │  Figma Embed    │  │  Documentation  │ │
-│  │   Navigation    │  │  Component      │  │  Display        │ │
-│  └─────────────────┘  └─────────────────┘  └─────────────────┘ │
-│           │                     │                     │         │
-│           └─────────────────────┼─────────────────────┘         │
-│                                 │                               │
-│  ┌─────────────────────────────┼─────────────────────────────┐ │
-│  │           App Context Provider                           │ │
-│  │  • State Management                                     │ │
-│  │  • Figma Integration                                    │ │
-│  │  • Navigation Control                                  │ │
-│  └─────────────────────────────────────────────────────────┘ │
-│                                 │                               │
-│  ┌─────────────────────────────┼─────────────────────────────┐ │
-│  │              AI Layer                                   │ │
-│  │  • Contextual Suggestions                              │ │
-│  │  • Google Genkit Integration                           │ │
-│  │  • Smart Documentation Recommendations                 │ │
-│  └─────────────────────────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-### Directory Structure
-
-```
-studio/
-├── src/
-│   ├── app/                    # Next.js App Router
-│   │   ├── layout.tsx         # Root layout with fonts & scripts
-│   │   ├── page.tsx           # Main application page
-│   │   ├── globals.css        # Global styles & CSS variables
-│   │   └── favicon.ico        # Application favicon
-│   │
-│   ├── components/            # React Components
-│   │   ├── docuproto/         # Core application components
-│   │   │   ├── AppContextProvider.tsx    # Global state management
-│   │   │   ├── FigmaEmbed.tsx            # Figma prototype integration
-│   │   │   ├── DocumentationDisplay.tsx  # Documentation renderer
-│   │   │   ├── NavigationMenu.tsx        # Sidebar navigation
-│   │   │   └── ContextualSuggestions.tsx # AI-powered suggestions
-│   │   │
-│   │   └── ui/                # Reusable UI components (Shadcn/ui)
-│   │       ├── sidebar.tsx    # Sidebar component
-│   │       ├── button.tsx     # Button variants
-│   │       ├── card.tsx       # Card layouts
-│   │       └── ...            # Additional UI components
-│   │
-│   ├── ai/                    # AI Integration Layer
-│   │   ├── genkit.ts         # Genkit configuration
-│   │   ├── dev.ts            # Development AI server
-│   │   └── flows/            # AI flow definitions
-│   │       └── suggest-documentation-snippets.ts
-│   │
-│   ├── data/                  # Static Data & Configuration
-│   │   └── documentation.ts   # Documentation content & structure
-│   │
-│   ├── lib/                   # Utility Functions
-│   │   └── utils.ts          # Tailwind utilities & helpers
-│   │
-│   └── hooks/                 # Custom React Hooks
-│
-├── docs/                      # Project Documentation
-│   ├── blueprint.md          # Original project specification
-│   ├── ARCHITECTURE.md       # This architecture document
-│   └── COMPONENTS.md          # Component documentation
-│
-├── Configuration Files
-├── package.json              # Dependencies & scripts
-├── tailwind.config.ts        # Tailwind CSS configuration
-├── tsconfig.json            # TypeScript configuration
-├── next.config.ts           # Next.js configuration
-├── components.json          # Shadcn/ui configuration
-└── apphosting.yaml         # Firebase hosting configuration
+┌───────────────────────────────────────────────────────────────────────┐
+│                            Next.js App (UI)                           │
+│  App Router                                                           │
+│  ┌───────────────┐   ┌─────────────────────┐   ┌───────────────────┐ │
+│  │  Top Nav      │   │  Left Pane          │   │   Right Pane      │ │
+│  │  Progress     │   │  (Device/Panels)    │   │ (Documentation)   │ │
+│  └───────────────┘   └─────────────────────┘   └───────────────────┘ │
+│              \____________________  ____________________/             │
+│                                   \/                                 │
+│                        AppContextProvider (State)                     │
+│             current step • next/back • restart • history              │
+└───────────────────────────────────────────────────────────────────────┘
+                 │                         │
+                 │                         │ (content)
+                 ▼                         ▼
+          integration-flow.json  →  documentation.ts → IOS_DOCUMENTATION
+                 │                         ▲
+                 └────────────── transforms/markdown ┘
 ```
 
 ---
 
-## Core Architecture Patterns
+## 4) Directory Map (project‑level)
+- `src/app/`
+  - `layout.tsx` – global HTML shell, fonts, toaster
+  - `page.tsx` – main two‑pane experience, landing, progress, nav, completion
+  - `globals.css` – base styles
+- `src/components/docuproto/`
+  - Core: `AppContextProvider.tsx`, `DocumentationDisplay.tsx`, `LeftPane.tsx`, `RightPane.tsx`, `MobilePhone.tsx`, `ProgressBar.tsx`, `TopNavigation.tsx`, `NavigationMenu.tsx`
+  - Panels: `ServerPanel.tsx`, `GoLivePanel.tsx`
+  - Screens: `screens/` → `ProductDetailScreen`, `CheckoutScreen`, `SuccessScreen`
+  - Utilities/Demos: `EmbeddedCodeSnippet.tsx`, `APIExampleTag.tsx`, examples
+- `src/components/ui/` – shadcn UI primitives (e.g., `toaster`, `sidebar`, `dialog`, etc.)
+- `src/data/`
+  - `integration-flow.json` – authoritative step definitions
+  - `documentation.ts` – validates and transforms markdown to HTML; exports `IOS_DOCUMENTATION`
+  - `schema.ts` – Zod schemas/types for flow and left‑pane configs
+  - `markdown.ts` – markdown→HTML utility
+- `src/hooks/` – small utilities (`use-toast`, `use-mobile`)
+- `src/lib/` – general utilities (`utils.ts`, `iconMap.ts`, `stepScreen.ts`)
 
-### 1. Context-Based State Management
-The application uses React Context for centralized state management through `AppContextProvider`, managing:
-- Current documentation section
-- Figma prototype interaction state
-- User interaction history
-- Bi-directional navigation state
-
-### 2. Event-Driven Communication
-Figma integration uses `postMessage` API for:
-- Prototype navigation commands
-- State change notifications
-- User interaction tracking
-- Bi-directional synchronization
-
-### 3. Component-Based Architecture
-Modular design with clear separation of concerns:
-- **Presentation Components**: UI rendering and user interaction
-- **Container Components**: Business logic and state management
-- **Utility Components**: Reusable UI elements
-
-### 4. AI-Powered Enhancement
-Google Genkit integration provides:
-- Contextual documentation suggestions
-- User behavior analysis
-- Smart content recommendations
+Configs:
+- `next.config.ts` – ignores TS/ESLint errors during build; image remote pattern
+- `tailwind.config.ts` – theme, fonts (`Nunito`), animations, content scan
+- `apphosting.yaml` – Firebase App Hosting (maxInstances=1)
+- `package.json` – scripts: `dev`, `build`, `start`
 
 ---
 
-## Data Flow Architecture
-
-### Primary Data Flow
-```
-User Interaction → Context Provider → Component Updates → UI Render
-       ↓
-Figma Prototype ← Message API ← Navigation Commands
-       ↓
-State Changes → Documentation Updates → AI Suggestions
-```
-
-### Figma Integration Flow
-```
-1. Figma Embed loads → INITIAL_LOAD event
-2. User navigates → PRESENTED_NODE_CHANGED event
-3. Context updates → Documentation section changes
-4. New section triggers → AI suggestion request
-5. AI responds → Contextual suggestions displayed
-```
+## 5) Runtime Behavior
+- Boot & Layout
+  - `Nunito` font loaded in `layout.tsx`; `Toaster` globally mounted
+  - App is predominantly client‑side for interactivity
+- Navigation
+  - Buttons for Back/Next; keyboard: Left/Right arrows (guarded for inputs)
+  - `ProgressBar` reflects the index within `IOS_DOCUMENTATION`
+  - Completion triggers `CongratulationsModal` with restart capability
+- Left Pane (Visualization)
+  - If step.left.type == `device`: `MobilePhone` renders one of three screens (Product, Checkout, Success) based on the step’s `asset` hint
+  - Overlays supported: spinner, banner, CTA disabled, badges
+  - If step.left.component is present: render `ServerPanel` or `GoLivePanel`
+- Right Pane (Documentation)
+  - `DocumentationDisplay` renders HTML produced by `documentation.ts` from step markdown
+  - API examples are rendered via reusable `APIDocumentation` with types exported, typically through `<APIExample/>` tag (`APIExampleTag.tsx`)
 
 ---
 
-## Security & Performance Considerations
-
-### Security
-- **Iframe Sandboxing**: Figma embed uses restricted sandbox permissions
-- **Origin Validation**: Message API validates Figma origin
-- **Type Safety**: TypeScript ensures type validation throughout
-- **Input Validation**: Zod schemas validate AI inputs/outputs
-
-### Performance
-- **Code Splitting**: Next.js automatic code splitting
-- **Image Optimization**: Next.js Image component optimization
-- **Component Memoization**: Strategic use of React.memo and useMemo
-- **Build Optimization**: TypeScript compilation with optimizations
+## 6) Data Model & Content Flow
+- Source of truth: `src/data/integration-flow.json`
+  - For each step: `id`, `title`, `left` (visualization meta), `right_md` (markdown instructions)
+- Validation & Transform: `src/data/documentation.ts`
+  - Validates flow with Zod schema
+  - Parses markdown → HTML (basic headings, lists, code blocks, inline code, quotes)
+  - Enriches with `iconName`
+  - Exports array `IOS_DOCUMENTATION` consumed by UI
 
 ---
 
-## Integration Points
-
-### External Services
-1. **Figma Embed Kit 2.0**: Interactive prototype embedding (no script dependencies)
-2. **Google AI (Genkit)**: Contextual AI suggestions
-3. **Firebase Hosting**: Application deployment
-4. **Google Fonts**: Typography (Inter, Space Grotesk)
-
-### Internal Integrations
-1. **Context Provider**: Centralized state management
-2. **Message Bus**: Figma communication layer
-3. **AI Flow**: Intelligent suggestion system
-4. **Navigation System**: Bi-directional prototype/docs sync
+## 7) State Management
+- `AppContextProvider`
+  - `currentDocSection`, `navigateForward`, `navigateBackward`, `restartPrototype`
+  - `interactionHistory` (last 5 actions), basic `addInteraction`
 
 ---
 
-## Deployment Architecture
-
-### Firebase Studio Integration
-- **App Hosting**: Firebase App Hosting configuration
-- **Build Process**: Next.js static generation
-- **Environment Management**: Development and production environments
-
-### Development Workflow
-```
-Local Development → Firebase Studio → Production Deployment
-       ↓
-Hot Reload (Turbopack) → Genkit AI Development Server
-```
+## 8) Security, Privacy, Compliance
+- Fonts via Google Fonts; standard web exposure only
+- No auth or PII storage in current scope
+- TypeScript + simple validation for content structure
 
 ---
 
-## Future Architecture Considerations
-
-### Scalability
-- Component library extraction for reuse
-- Micro-frontend architecture for larger teams
-- API layer abstraction for multiple prototype sources
-
-### Enhancement Opportunities
-- Real-time collaboration features
-- Advanced AI personalization
-- Multi-language documentation support
-- Analytics and usage tracking integration
+## 9) Performance & Reliability
+- Dev: Turbopack for fast HMR; memoized left‑pane props to reduce re‑renders
+- Build: Code splitting via App Router; image domains restricted (placeholder)
+- Known tradeoff: `next.config.ts` ignores TS/ESLint errors at build time (fast iteration, lower safety)
+- Opportunities:
+  - Add React profiling and memoization to heavy UI primitives if needed
+  - Pre‑sanitize/compile markdown to reduce runtime string ops if content grows
 
 ---
 
-## Development Guidelines
+## 10) Extensibility
+- Content
+  - Add/update steps by editing only `integration-flow.json`
+  - Extend markdown processor for tables, images, admonitions
+- Visualization
+  - Add screen types in `MobilePhone` and map via step metadata
+  - Add more panel types (`component` switch) for admin/console flows
+- Configuration
+  - Move product‑wide constants into a `src/config/` module if needed
+- Quality
+  - Introduce unit tests for `documentation.ts` and `AppContextProvider`
+  - Turn off `ignoreBuildErrors` and `ignoreDuringBuilds` when hardening
 
-### Code Organization
-- Follow Next.js App Router conventions
-- Maintain clear component boundaries
-- Use TypeScript for all new code
-- Implement proper error boundaries
+---
 
-### Performance Guidelines
-- Minimize bundle size through code splitting
-- Optimize component re-renders
-- Use React DevTools for performance monitoring
-- Implement proper loading states
+## 11) Deployment
+- Local
+  - `npm run dev` → Next + Turbopack on port 9002
+- Build/Run
+  - `npm run build` → Next build
+  - `npm start` → Next start
+- Hosting
+  - Firebase App Hosting (`apphosting.yaml`, `maxInstances: 1` initially)
 
-### AI Integration Guidelines
-- Validate all AI inputs with Zod schemas
-- Handle AI failures gracefully
-- Implement proper fallback mechanisms
-- Monitor AI response quality 
+---
+
+## 12) Known Gaps
+- No comprehensive test suite yet
+- Build ignores TS/ESLint errors; helpful now, risky later
+- Analytics/telemetry not instrumented
+
+---
+
+## 13) Review Notes (Architect’s Simplified Guidance)
+- Make content the product: Keep the walkthrough entirely data‑driven. Owners should only touch `integration-flow.json` for most updates.
+- Treat visuals as views: Left pane renders whatever the step describes. Add small, well‑named view components instead of branching logic.
+- Strengthen typing at the edges: Validate `integration-flow.json` with Zod to catch authoring mistakes early.
+- Turn safety back on before launch: Remove `ignoreBuildErrors`/`ignoreDuringBuilds`, add minimal tests for state and markdown transform.
+- Centralize configuration: Use a small `src/config/` module when new constants emerge.
+- Keep performance boring: Memoize obvious hotspots, avoid premature optimizations. Measure first if content or UI grows.
+- Ship a steady path to “Done”:
+  1) Validate data schema → 2) Remove build ignores → 3) Add tests for navigation and transform → 4) Add basic telemetry. 

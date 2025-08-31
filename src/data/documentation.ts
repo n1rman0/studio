@@ -1,152 +1,58 @@
+import flowData from './integration-flow.json';
+import { z } from 'zod';
+
+// A simple markdown-to-HTML converter
+const processMarkdown = (md: string): string => {
+    return md
+        .replace(/^(#+)\s*(.*)/gm, (_, hashes, text) => `<h${hashes.length} class="font-headline text-${4 - hashes.length}xl mt-${8 - hashes.length} mb-2">${text}</h${hashes.length}>`)
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/`([^`]+)`/g, '<code class="bg-slate-100 text-slate-800 rounded px-1 py-0.5 text-sm">$1</code>')
+        .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre class="bg-gray-900 text-white rounded-md p-4 text-sm overflow-x-auto"><code>$2</code></pre>')
+        .replace(/^-\s(.*)/gm, '<ul class="list-disc pl-5"><li>$1</li></ul>') // Basic list support
+        .replace(/^>\s(.*)/gm, '<blockquote class="border-l-4 border-slate-300 pl-4 text-slate-600 italic my-2">$1</blockquote>')
+        .replace(/(\d)\.\s(.*)/g, '<ol class="list-decimal pl-5"><li>$2</li></ol>') // Basic ordered list support
+        .replace(/\n/g, '<br/>')
+        .replace(/<br\/><(h\d|ul|ol|blockquote|pre)/g, '<$1') // Correct spacing for block elements
+        .replace(/<\/li><br\/><li>/g, '</li><li>');
+};
+
+// Zod schema to validate flow data
+const StepSchema = z.object({
+    id: z.string(),
+    title: z.string(),
+    right_md: z.string(),
+    left: z.any(), // Keep flexible; only minimal shape validation is required now
+});
+
+const FlowSchema = z.object({
+    steps: z.array(StepSchema)
+});
+
+const parsedFlow = FlowSchema.parse(flowData);
+
 export interface DocSection {
     id: string;
-    figmaNodeId: string;
     title: string;
-    content: string; // Markdown content
-    relatedSuggestionsQuery?: string;
-    icon?: React.ElementType; // Lucide icon
+    content: string; // HTML content
+    left: any; // Keeping this flexible to match the JSON structure
     iconName?: string;
 }
 
-// Cart - 0:1348
-// Cart Loading - 5:355
-// Checkout - 0:1220
+const steps = parsedFlow.steps.map(step => {
+    let iconName = 'BookOpen';
+    if (step.id.includes('SERVER')) iconName = 'Database';
+    else if (step.id.includes('GOLIVE')) iconName = 'Rocket';
+    else if (step.id.includes('ORDER')) iconName = 'Settings';
+    else if (step.id.includes('CHECKOUT')) iconName = 'CreditCard';
+    else if (step.id.includes('PAYMENT')) iconName = 'ShieldCheck';
 
+    return {
+        id: step.id,
+        title: step.title,
+        content: processMarkdown(step.right_md),
+        left: step.left,
+        iconName: iconName,
+    };
+});
 
-// It's better to import icons where they are used to keep this file data-only
-// For now, we'll define them as strings and map them in NavigationMenu.tsx
-// Example: import { BookOpen, Settings, CreditCard } from 'lucide-react';
-
-export const IOS_DOCUMENTATION: DocSection[] = [
-    {
-        id: 'cart',
-        figmaNodeId: '0:1348', // Cart node ID
-        title: 'Shopping Cart Implementation',
-        iconName: 'BookOpen',
-        content: `
-<h1 class="font-headline text-3xl mb-4">Shopping Cart Implementation</h1>
-<p class="mb-2">Learn how to implement a robust shopping cart system in your iOS app with Razorpay's comprehensive e-commerce SDK.</p>
-<h2 class="font-headline text-2xl mt-4 mb-2">Cart Management</h2>
-<CartImplementationSnippet/>
-<h2 class="font-headline text-2xl mt-4 mb-2">Cart Persistence</h2>
-<p class="mb-2">The cart automatically persists data locally using Core Data, ensuring user's cart survives app restarts.</p>
-<CartPersistenceSnippet/>
-`,
-        relatedSuggestionsQuery: 'iOS shopping cart implementation best practices',
-    },
-    {
-        id: 'cart-loading',
-        figmaNodeId: '5:355', // Cart Loading node ID
-        title: 'Cart Loading States',
-        iconName: 'BookOpen',
-        content: `
-<h1 class="font-headline text-3xl mb-4">Managing Cart Loading States</h1>
-<p class="mb-2">Provide excellent user experience by properly handling loading states during cart operations.</p>
-
-<ShoppingCartAPIExample/>
-`,
-        relatedSuggestionsQuery: 'iOS loading states UX best practices',
-    },
-    {
-        id: 'checkout',
-        figmaNodeId: '0:1220', // Checkout node ID
-        title: 'Checkout Process',
-        iconName: 'BookOpen',
-        content: `
-<h1 class="font-headline text-3xl mb-4">Implementing Secure Checkout with Razorpay</h1>
-<p class="mb-2">Complete the purchase flow with Razorpay's secure checkout implementation supporting multiple payment methods.</p>
-<h2 class="font-headline text-2xl mt-4 mb-2">Checkout Flow</h2>
-<CheckoutFlowSnippet/>
-<h2 class="font-headline text-2xl mt-4 mb-2">Supported Payment Methods</h2>
-<p class="mb-2">Razorpay supports 100+ payment methods popular in India and globally.</p>
-<ul class="list-disc pl-5 space-y-1 mb-4">
-  <li>UPI (Google Pay, PhonePe, Paytm, BHIM)</li>
-  <li>Credit/Debit cards (Visa, Mastercard, RuPay)</li>
-  <li>Net Banking (All major banks)</li>
-  <li>Digital Wallets (Paytm, Mobikwik, Freecharge)</li>
-  <li>Buy now, pay later (Simpl, LazyPay)</li>
-  <li>International cards and wallets</li>
-</ul>
-`,
-        relatedSuggestionsQuery: 'iOS secure checkout implementation payment methods',
-    },
-    {
-        id: 'checkout-loading',
-        figmaNodeId: '3:161', // Checkout Loading node ID
-        title: 'Checkout Loading States',
-        iconName: 'BookOpen',
-        content: `
-<h1 class="font-headline text-3xl mb-4">Managing Checkout Loading States</h1>
-<p class="mb-2">Ensure a smooth checkout experience by implementing proper loading states during payment processing and order completion.</p>
-
-</div>
-<h2 class="font-headline text-2xl mt-4 mb-2">Error Handling During Loading</h2>
-<p class="mb-2">Gracefully handle errors and provide clear feedback when checkout operations fail.</p>
-<ErrorHandlingSnippet/>
-`,
-        relatedSuggestionsQuery: 'iOS checkout loading states payment processing UX',
-    },
-    {
-        id: 'payment-success',
-        figmaNodeId: '100:279', // Payment Success node ID
-        title: 'Payment Success',
-        iconName: 'BookOpen',
-        content: `
-<h1 class="font-headline text-3xl mb-4">Payment Success Implementation</h1>
-<p class="mb-2">Create a delightful and informative payment success experience that builds customer confidence and provides essential order information.</p>
-
-<h2 class="font-headline text-2xl mt-4 mb-2">Success Page Components</h2>
-<p class="mb-2">A comprehensive payment success page should include these key elements:</p>
-<ul class="list-disc pl-5 space-y-1 mb-4">
-  <li>Clear success confirmation with visual feedback (checkmark, animation)</li>
-  <li>Order summary with item details and total amount</li>
-  <li>Payment method used and transaction ID</li>
-  <li>Estimated delivery date and tracking information</li>
-  <li>Next steps and account management options</li>
-</ul>
-
-<PaymentSuccessSnippet/>
-
-<h2 class="font-headline text-2xl mt-4 mb-2">Post-Payment Actions</h2>
-<p class="mb-2">Implement these actions immediately after successful payment:</p>
-<ul class="list-disc pl-5 space-y-1 mb-4">
-  <li>Clear the shopping cart</li>
-  <li>Send confirmation email/SMS to customer</li>
-  <li>Update inventory and order management systems</li>
-  <li>Initialize order tracking</li>
-  <li>Trigger analytics events for conversion tracking</li>
-</ul>
-
-<PostPaymentActionsSnippet/>
-
-<h2 class="font-headline text-2xl mt-4 mb-2">User Experience Best Practices</h2>
-<p class="mb-2">Follow these UX guidelines for an optimal payment success experience:</p>
-<ul class="list-disc pl-5 space-y-1 mb-4">
-  <li>Show immediate visual confirmation (animation, confetti, checkmark)</li>
-  <li>Provide clear order reference number for future support</li>
-  <li>Include "Continue Shopping" and "View Orders" action buttons</li>
-  <li>Offer account creation for guest checkout users</li>
-  <li>Display expected delivery timeline prominently</li>
-</ul>
-
-<h2 class="font-headline text-2xl mt-4 mb-2">Error Recovery</h2>
-<p class="mb-2">Handle edge cases where payment succeeds but order processing fails:</p>
-<OrderRecoverySnippet/>
-`,
-        relatedSuggestionsQuery: 'iOS payment success confirmation UX order management',
-    },
-
-];
-
-// export const FIGMA_PROTOTYPE_URL = "https://www.figma.com/proto/Qy1SqTQFBGy0MbDona2oA5/Finance-Management-Mobile-App-UI-UX-Kit-for-Budget-Tracker-Financial-Prototype-Design--Community-?node-id=7113-2955&starting-point-node-id=7113%3A2955&scaling=contain&hide-ui=1&hotspot-hints=false&show-proto-sidebar=false&footer=false&viewport-controls=false";
-
-// https://www.figma.com/proto/QPOIyfhh0EBiMmxwje72vb/TestDocuProto?t=jaGNq35VJJr3y5ZD-1&scaling=min-zoom&content-scaling=fixed&page-id=0%3A1&node-id=0-1348
-
-// --- New constants for Embed Kit 2.0 ---
-// Extracted from the FIGMA_PROTOTYPE_URL
-export const FIGMA_FILE_KEY = "QPOIyfhh0EBiMmxwje72vb";
-// export const FIGMA_FILE_KEY = "Qy1SqTQFBGy0MbDona2oA5"; 
-// uoGu3U8xmrBAxw2jUm91LQ // Qy1SqTQFBGy0MbDona2oA5
-// IMPORTANT: Replace with your actual Figma OAuth App Client ID
-export const FIGMA_CLIENT_ID = "bYl9dYt9uFb5zjdkB7mQ4z";
-// export const FIGMA_CLIENT_ID = "jaGNq35VJJr3y5ZD-1"; 
+export const IOS_DOCUMENTATION: DocSection[] = steps;

@@ -1,537 +1,251 @@
-# DocuProto - Components Documentation
+# DocuProto – Components
 
-## Overview
+## 1) Overview
+Components are organized to deliver a two‑pane experience:
+- Left pane: simulated device or panels that visualize the current step
+- Right pane: documentation rendered from data (markdown → HTML)
+- A thin global context drives navigation and step state
 
-This document provides detailed information about all React components in the DocuProto application. Each component is documented with its purpose, props, usage patterns, and implementation details.
-
----
-
-## Component Hierarchy
-
-```
-App
-└── AppContextProvider
-    └── SidebarProvider
-        ├── Sidebar
-        │   ├── SidebarHeader
-        │   └── SidebarContent
-        │       └── NavigationMenu
-        └── SidebarInset
-            └── Main Layout
-                ├── FigmaEmbed
-                ├── DocumentationDisplay
-                └── ContextualSuggestions (EventDisplay)
-```
+This document focuses on the core components actually present in the codebase and how they compose.
 
 ---
 
-## Core Application Components
+## 2) Component Map
+```
+App (src/app/page.tsx)
+└─ AppContextProvider
+   ├─ TopNavigation
+   ├─ ProgressBar
+   ├─ Left Pane (visualization)
+   │   └─ MobilePhone | ServerPanel | GoLivePanel
+   │      └─ screens: ProductDetailScreen | CheckoutScreen | SuccessScreen
+   └─ Right Pane (docs)
+       └─ DocumentationDisplay
+```
+Support components:
+- DeviceWrapper, OverlayLoader, CongratulationsModal, EmbeddedCodeSnippet (+snippet exports)
+- UI primitives: button, card, dropdown‑menu, badge, scroll‑area, sidebar, toast/toaster, etc.
 
+- Note: `LeftPane.tsx` orchestrates the left visualization (device/panels). `RightPane.tsx` wraps and lays out `DocumentationDisplay`.
+
+---
+
+## 3) Core State
 ### AppContextProvider
-**Location**: `src/components/docuproto/AppContextProvider.tsx`
+Location: `src/components/docuproto/AppContextProvider.tsx`
 
-**Purpose**: Centralized state management for the entire application using React Context.
+Role: Centralized state for the walkthrough.
 
-**State Management**:
-```typescript
+Context shape:
+```ts
 interface AppContextType {
   currentDocSection: DocSection | null;
   setCurrentDocSectionById: (id: string | null) => void;
-  navigateToFigmaNode: (nodeId: string) => void;
-  figmaIframeRef: React.RefObject<HTMLIFrameElement>;
+  navigateForward: () => void;
+  navigateBackward: () => void;
+  restartPrototype: () => void;
   interactionHistory: string[];
   addInteraction: (interaction: string) => void;
-  isFigmaReady: boolean;
-  setIsFigmaReady: (isReady: boolean) => void;
 }
 ```
-
-**Key Features**:
-- **Documentation Navigation**: Manages current documentation section
-- **Figma Integration**: Provides iframe reference and ready state
-- **Interaction Tracking**: Maintains history of user interactions (last 5)
-- **Bi-directional Sync**: Coordinates between Figma prototype and documentation
-
-**Usage Pattern**:
-```typescript
-const { currentDocSection, setCurrentDocSectionById, navigateToFigmaNode } = useAppContext();
-```
-
-**Implementation Notes**:
-- Uses `useCallback` for performance optimization
-- Automatically initializes with first documentation section
-- Manages iframe reference for Figma communication
+Key behaviors:
+- Initializes current section to the first item in `IOS_DOCUMENTATION`
+- Provides forward/back/restart navigation and lightweight interaction history
 
 ---
 
-### FigmaEmbed
-**Location**: `src/components/docuproto/FigmaEmbed.tsx`
-
-**Purpose**: Embeds Figma prototype and handles bi-directional communication with the prototype.
-
-**Key Features**:
-- **Figma Embed Kit 2.0 Integration**: Uses the latest Figma Embed Kit 2.0 (no script dependencies required)
-- **Enhanced Message Handling**: Processes all official Figma events with improved error handling
-- **State Synchronization**: Updates documentation based on prototype navigation
-- **Interaction Tracking**: Records detailed user interactions with prototype
-- **Complete API Coverage**: Implements all documented event types and control messages
-
-**Figma Events Handled** (Official API):
-```typescript
-// All official Embed Kit 2.0 events
-"INITIAL_LOAD"              // Prototype ready
-"PRESENTED_NODE_CHANGED"    // User navigated to new frame
-"MOUSE_PRESS_OR_RELEASE"    // User interaction (hotspot vs canvas)
-"NEW_STATE"                 // Component state change
-"REQUEST_CLOSE"             // User pressed Spacebar to close
-"LOGIN_SCREEN_SHOWN"        // Authentication required
-"PASSWORD_SCREEN_SHOWN"     // Password-protected file
-```
-
-**Control Messages Supported**:
-```typescript
-// Prototype navigation controls
-"NAVIGATE_TO_FRAME_AND_CLOSE_OVERLAYS"  // Navigate to specific node
-"NAVIGATE_FORWARD"                      // Next frame in sequence
-"NAVIGATE_BACKWARD"                     // Previous frame in sequence
-"RESTART"                               // Restart prototype flow
-```
-
-**Configuration**:
-```typescript
-// Embed Kit 2.0 URL - Enhanced with official parameters
-const embedSrc = `https://embed.figma.com/proto/${FIGMA_FILE_KEY}?embed-host=docuproto&client-id=${FIGMA_CLIENT_ID}&footer=false&hotspot-hints=true&theme=system&viewport-controls=true`;
-```
-
-**URL Parameters Used**:
-- `embed-host`: Required identifier for the hosting application
-- `client-id`: Required for Embed API functionality
-- `footer=false`: Clean interface without Figma branding
-- `hotspot-hints=true`: Show clickable areas for better UX
-- `theme=system`: Automatically match user's system theme
-- `viewport-controls=true`: Allow panning and zooming
-
-**Migration Compliance**:
-- ✅ Uses `https://embed.figma.com/` subdomain (not `www.figma.com/embed`)
-- ✅ Uses hyphenated parameters (`embed-host`, `client-id`)
-- ✅ Includes required `client-id` for prototype control
-- ✅ Excludes deprecated `embed_origin` parameter
-- ✅ Handles all official event types from documentation
-
-**Security Features**:
-- Origin validation for Figma messages
-- Enhanced iframe sandboxing with presentation permissions
-- Clipboard access for better UX
-- Safe message handling with type checking and error boundaries
-
-**Performance Enhancements**:
-- Lazy loading for improved initial page load
-- useCallback for optimized event handling
-- No external script dependencies (unlike Embed API 1.0)
-
-**UI Elements**:
-- Header with Embed Kit 2.0 status indicator
-- Full-screen iframe container
-- Loading state indicators
-
----
-
+## 4) Right Pane (Documentation)
 ### DocumentationDisplay
-**Location**: `src/components/docuproto/DocumentationDisplay.tsx`
+Location: `src/components/docuproto/DocumentationDisplay.tsx`
 
-**Purpose**: Renders the current documentation section with rich HTML content.
+Role: Renders the current section’s content. Content is HTML produced by a markdown transform, with support for embedded special tags that map to React components.
 
-**Features**:
-- **Dynamic Content Rendering**: Displays HTML content from documentation data
-- **Context-Aware Display**: Shows content based on current section
-- **Responsive Design**: Adapts to different screen sizes
-- **Rich Typography**: Supports custom fonts and styling
+Special inline tags supported:
+- `<APIDocumentationExample/>`
+- `<APIExample/>`
+- `<CartTypewriterDemo/>`
+- Code snippets from `EmbeddedCodeSnippet`: `<CartImplementationSnippet/>`, `<CartPersistenceSnippet/>`, `<CheckoutFlowSnippet/>`, `<ErrorHandlingSnippet/>`, `<RzpInitSwiftSnippet/>`, `<RzpInitObjcSnippet/>`, `<RzpOpenSwiftSnippet/>`, `<RzpOpenObjcSnippet/>`, `<RzpDisplayControllerSwiftSnippet/>`, `<RzpDelegateSwiftProtocolSnippet/>`, `<RzpDelegateObjcProtocolSnippet/>`, `<RzpDelegateSwiftWithDataSnippet/>`, `<RzpDelegateObjcWithDataSnippet/>`, `<CocoaPodSnippet/>`, `<PodInstallSnippet/>`, `<AtsInfoPlistSnippet/>`
 
-**Content Structure**:
-```typescript
-interface DocSection {
-  id: string;
-  figmaNodeId: string;
-  title: string;
-  content: string; // HTML content
-  relatedSuggestionsQuery?: string;
-  iconName?: string;
+Notes:
+- Uses `dangerouslySetInnerHTML` to render HTML fragments
+- Wrapped in a `Card` + `ScrollArea`; typography via Tailwind/`prose` classes
+
+### APIDocumentation
+Location: `src/components/docuproto/APIDocumentation.tsx`
+
+Role: Generic, reusable API documentation renderer.
+
+Exports:
+```ts
+export interface APIEndpoint {
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+  path: string;
+  description?: string;
+  requestExample?: object;
+  responseExample: object;
+}
+
+export interface APIDocumentationProps {
+  endpoints: APIEndpoint[];
 }
 ```
 
-**Styling Features**:
-- Custom font families (Inter, Space Grotesk)
-- Responsive text sizing
-- Code block highlighting
-- List and typography styling
+### APIExample
+Location: `src/components/docuproto/ShoppingCartAPIExample.tsx` (renovated)
 
-**Implementation**:
-- Uses `dangerouslySetInnerHTML` for rich content
-- Scroll area for long content
-- Graceful fallback for missing sections
+Role: Dumb wrapper that accepts `endpoints: APIEndpoint[]` and renders `APIDocumentation` without hardcoded data.
+
+### APIExampleTag
+Location: `src/components/docuproto/APIExampleTag.tsx`
+
+Role: Convenience tag used by docs (`<APIExample/>`) to render a default HTTP request/response example (create order). Replace or extend as needed.
 
 ---
+
+## 5) Left Pane (Visualization)
+### MobilePhone
+Location: `src/components/docuproto/MobilePhone.tsx`
+
+Props:
+```ts
+interface MobilePhoneProps {
+  overlayVisible?: boolean;
+  overlayLabel?: string;
+  screen?: 'product' | 'checkout' | 'success';
+  onRequestNext?: () => void;
+  onRequestBack?: () => void;
+  onRequestGoto?: (id: string) => void;
+  buyDisabled?: boolean;
+  lockTooltip?: string;
+  toastText?: string | null;
+}
+```
+Behavior:
+- Renders one of three screen components: `ProductDetailScreen`, `CheckoutScreen`, `SuccessScreen`
+- Shows `OverlayLoader` when `overlayVisible`
+- Can display a transient toast banner at the top of the device
+
+Screen components:
+- `screens/ProductDetailScreen.tsx`
+- `screens/CheckoutScreen.tsx`
+- `screens/SuccessScreen.tsx`
+
+Step mapping:
+- The main page derives `screen` (product/checkout/success) from step metadata (`left.asset` hints)
+
+### ServerPanel / GoLivePanel
+Location: `src/components/docuproto/ServerPanel.tsx`, `src/components/docuproto/GoLivePanel.tsx`
+
+Role: Alternative left‑pane views when a step uses `left.component` instead of a `device`.
+
+---
+
+## 6) Navigation & Chrome
+### TopNavigation
+Location: `src/components/docuproto/TopNavigation.tsx`
+
+Role:
+- Sticky header with title and a dropdown for quick section switching
+- Uses Lucide icons mapped by `iconName` from each section
+
+Key bits:
+- Dropdown lists `IOS_DOCUMENTATION`; selecting an item updates the current section
+- Icon map includes: `BookOpen`, `Settings`, `CreditCard`, `Palette`, `Code`, `Database`, `Rocket`, `ShieldCheck`
+
+### ProgressBar
+Location: `src/components/docuproto/ProgressBar.tsx`
+
+Role:
+- Displays step count and a progress indicator
+- Provides clickable step markers to jump to a section
+
+Notes:
+- Reads `IOS_DOCUMENTATION` for total/count; accessible ARIA attributes set
+- Includes small, user‑friendly labels for select steps
 
 ### NavigationMenu
-**Location**: `src/components/docuproto/NavigationMenu.tsx`
+Location: `src/components/docuproto/NavigationMenu.tsx`
 
-**Purpose**: Provides sidebar navigation for documentation sections.
-
-**Features**:
-- **Section Navigation**: Lists all available documentation sections
-- **Active State Management**: Highlights current section
-- **Icon Integration**: Displays Lucide icons for each section
-- **Responsive Behavior**: Collapses on mobile devices
-
-**Icon Mapping**:
-```typescript
-const iconMap = {
-  'BookOpen': BookOpen,
-  'Settings': Settings,
-  'CreditCard': CreditCard,
-  'Palette': Palette,
-};
-```
-
-**Navigation Behavior**:
-- Updates context when section is selected
-- Triggers Figma navigation for bi-directional sync
-- Tracks interactions for AI suggestions
-
-**UI Structure**:
-- Scrollable section list
-- Hover and active states
-- Icon and text layout
-- Responsive typography
+Role:
+- Sidebar list of sections using UI `sidebar` primitives
+- Click sets current section
 
 ---
 
-### ContextualSuggestions (EventDisplay)
-**Location**: `src/components/docuproto/ContextualSuggestions.tsx`
+## 7) Data & Transform
+### documentation.ts
+Location: `src/data/documentation.ts`
 
-**Purpose**: Displays AI-powered contextual suggestions and user interaction history.
+Role:
+- Loads `integration-flow.json` and transforms markdown to HTML
+- Validates the flow shape using Zod before transforming
+- Exports `IOS_DOCUMENTATION` array consumed by UI
 
-**Features**:
-- **AI Integration**: Fetches suggestions based on current context
-- **Interaction History**: Shows recent user interactions
-- **Dynamic Updates**: Refreshes when context changes
-- **Loading States**: Provides feedback during AI processing
-
-**AI Integration**:
-```typescript
-// Calls AI flow for suggestions
-const suggestions = await suggestDocumentationSnippets({
-  currentSection: currentDocSection.title,
-  userQuery: '',
-  interactionHistory
-});
-```
-
-**Display Elements**:
-- Recent interactions list
-- AI-generated suggestions
-- Loading indicators
-- Error handling for AI failures
-
-**State Management**:
-- Loading state during AI calls
-- Error handling for failed requests
-- Graceful fallback when AI is unavailable
+Transform features:
+- Headings, lists (ordered/unordered), blockquotes
+- Inline code and fenced code blocks
+- Minor spacing corrections for block elements
+- Adds `iconName`
 
 ---
 
-## UI Component Library
-
-The application uses a comprehensive set of UI components based on Radix UI and Shadcn/ui. These provide consistent, accessible, and customizable interface elements.
-
-### Layout Components
-
-#### Sidebar
-**Location**: `src/components/ui/sidebar.tsx`
-
-**Purpose**: Collapsible sidebar container with multiple variants.
-
-**Features**:
-- **Collapsible Behavior**: Can collapse to icon-only mode
-- **Responsive Design**: Adapts to mobile and desktop
-- **State Management**: Maintains open/closed state
-- **Accessibility**: Full keyboard navigation support
-
-**Component Variants**:
-```typescript
-// Core sidebar components
-SidebarProvider    // Context provider for sidebar state
-Sidebar           // Main container
-SidebarHeader     // Header section
-SidebarContent    // Scrollable content area
-SidebarInset      // Main content area
-SidebarTrigger    // Toggle button
-```
-
-**Usage Pattern**:
-```typescript
-<SidebarProvider defaultOpen={true}>
-  <Sidebar collapsible="icon">
-    <SidebarHeader />
-    <SidebarContent />
-  </Sidebar>
-  <SidebarInset>
-    {/* Main content */}
-  </SidebarInset>
-</SidebarProvider>
-```
-
-### Interactive Components
-
-#### Button
-**Location**: `src/components/ui/button.tsx`
-
-**Variants**: Primary, Secondary, Destructive, Outline, Ghost, Link
-
-**Features**:
-- Size variants (sm, default, lg, icon)
-- Loading states
-- Disabled states
-- Icon support
-
-#### Card
-**Location**: `src/components/ui/card.tsx`
-
-**Components**:
-- `Card` - Container
-- `CardHeader` - Header section
-- `CardContent` - Main content
-- `CardFooter` - Footer section
-
-### Form Components
-
-#### Input
-**Location**: `src/components/ui/input.tsx`
-
-**Features**:
-- Standard form input
-- Consistent styling
-- Focus states
-- Error states
-
-#### Label
-**Location**: `src/components/ui/label.tsx`
-
-**Features**:
-- Form label component
-- Accessibility compliance
-- Consistent typography
-
-### Feedback Components
-
-#### Toast
-**Location**: `src/components/ui/toast.tsx`
-
-**Features**:
-- Success, error, warning variants
-- Auto-dismiss functionality
-- Action buttons
-- Accessible announcements
-
-#### Progress
-**Location**: `src/components/ui/progress.tsx`
-
-**Features**:
-- Determinate progress indicator
-- Smooth animations
-- Accessible progress reporting
+## 8) Utilities & Primitives
+- `EmbeddedCodeSnippet.tsx` – exports many snippet components used by `DocumentationDisplay`
+- `OverlayLoader.tsx` – overlay spinner for simulated waiting states
+- `DeviceWrapper.tsx` – visual device frame for the phone
+- `CongratulationsModal.tsx` – modal shown at the end of the flow
+- UI library under `src/components/ui/` – button, card, dropdown‑menu, badge, scroll‑area, sidebar, toast/toaster, etc. (shadcn/radix)
+- `src/lib/iconMap.ts` – central icon resolver for section icons
+- `src/lib/stepScreen.ts` – pure utilities to compute screen kind and left‑pane props
 
 ---
 
-## Data Layer Components
+## 9) Composition Patterns & Conventions
+- Two‑pane layout: the page composes left visualization and right documentation; keep them decoupled except for current step
+- Step‑driven UI: left pane strictly reflects the step’s `left` metadata; avoid special‑casing in components
+- Extensible tags: add new inline tags by extending `DocumentationDisplay` mapping and exporting a small React component
+- Accessibility: maintain keyboard nav (Left/Right arrows) and ARIA for progress/navigation elements
 
-### Documentation Data Structure
-**Location**: `src/data/documentation.ts`
+---
 
-**Purpose**: Defines documentation content and structure.
+## 10) Extensibility
+- Add steps by editing `src/data/integration-flow.json` only
+- Add new screen types by extending `MobilePhone` and the step→screen mapping on the page
+- Add new panels by introducing a component and switching via `left.component`
+- Enrich markdown: extend the transform to support tables/images/admonitions
 
-**Data Schema**:
-```typescript
-interface DocSection {
-  id: string;                    // Unique identifier
-  figmaNodeId: string;          // Corresponding Figma node
-  title: string;                // Section title
-  content: string;              // HTML content
-  relatedSuggestionsQuery?: string; // AI query hint
-  iconName?: string;            // Lucide icon name
-}
+---
+
+## 11) Usage Examples
+Jump to a specific step via the progress markers:
+```tsx
+// inside ProgressBar, clicking a marker
+setCurrentDocSectionById(IOS_DOCUMENTATION[index].id);
 ```
 
-**Content Sections**:
-1. **Welcome** - Introduction to Payment SDK
-2. **Initialization** - SDK setup and configuration
-3. **Making Payment** - Payment processing examples
-4. **UI Customization** - Theming and styling options
+Render a docs section with embedded React tags in content:
+```tsx
+// in DocumentationDisplay renderContent()
+if (part === '<APIExample/>') return <APIExampleTag />;
+```
 
-**Configuration Constants**:
-```typescript
-export const FIGMA_PROTOTYPE_URL = "...";
-export const FIGMA_FILE_KEY = "...";
-export const FIGMA_CLIENT_ID = "...";
+Use the MobilePhone with overlays:
+```tsx
+<MobilePhone
+  screen="checkout"
+  overlayVisible
+  overlayLabel="Processing payment..."
+  onRequestNext={navigateForward}
+  onRequestBack={navigateBackward}
+/>
 ```
 
 ---
 
-## AI Integration Components
-
-### Genkit Configuration
-**Location**: `src/ai/genkit.ts`
-
-**Purpose**: Configures Google Genkit for AI operations.
-
-**Features**:
-- Google AI plugin configuration
-- Development environment setup
-- Flow definitions
-
-### AI Flow: Documentation Suggestions
-**Location**: `src/ai/flows/suggest-documentation-snippets.ts`
-
-**Purpose**: Generates contextual documentation suggestions.
-
-**Input Schema**:
-```typescript
-{
-  currentSection: string;       // Current documentation section
-  userQuery?: string;          // Optional user query
-  interactionHistory?: string[]; // Recent interactions
-}
-```
-
-**Output Schema**:
-```typescript
-{
-  suggestedSnippets: string[];  // AI-generated suggestions
-}
-```
-
-**Implementation Notes**:
-- Currently bypassed due to no active AI plugins
-- Graceful fallback to empty suggestions
-- Zod schema validation for type safety
-
----
-
-## Utility Components
-
-### Utils
-**Location**: `src/lib/utils.ts`
-
-**Purpose**: Utility functions for component styling and logic.
-
-**Functions**:
-```typescript
-// Tailwind class merging utility
-cn(...classes: ClassValue[]) => string
-```
-
-**Features**:
-- Conditional class application
-- Tailwind CSS class merging
-- Type-safe styling utilities
-
----
-
-## Component Development Guidelines
-
-### Best Practices
-
-1. **Type Safety**
-   - Use TypeScript for all components
-   - Define proper prop interfaces
-   - Implement proper error boundaries
-
-2. **Performance**
-   - Use `React.memo` for expensive components
-   - Implement `useMemo` and `useCallback` appropriately
-   - Avoid unnecessary re-renders
-
-3. **Accessibility**
-   - Follow WCAG guidelines
-   - Use semantic HTML elements
-   - Implement proper ARIA attributes
-
-4. **Styling**
-   - Use Tailwind CSS utilities
-   - Follow design system conventions
-   - Implement responsive design patterns
-
-### Component Structure Template
-```typescript
-"use client"; // If client component
-
-import React from 'react';
-import { cn } from '@/lib/utils';
-
-interface ComponentProps {
-  // Define props with proper types
-}
-
-const Component: React.FC<ComponentProps> = ({ 
-  // Destructure props
-}) => {
-  // Component logic
-  
-  return (
-    <div className={cn("base-classes", conditionalClasses)}>
-      {/* Component JSX */}
-    </div>
-  );
-};
-
-export default Component;
-```
-
-### Testing Considerations
-
-1. **Unit Testing**
-   - Test component rendering
-   - Test prop handling
-   - Test event handling
-
-2. **Integration Testing**
-   - Test context interactions
-   - Test API integrations
-   - Test user workflows
-
-3. **Accessibility Testing**
-   - Screen reader compatibility
-   - Keyboard navigation
-   - Color contrast compliance
-
----
-
-## Component Dependencies
-
-### External Dependencies
-- **React 18.3.1** - Core component library
-- **Radix UI** - Headless UI primitives
-- **Lucide React** - Icon components
-- **Class Variance Authority** - Component variant management
-
-### Internal Dependencies
-- **Context System** - AppContextProvider
-- **Utility Functions** - Styling and helper functions
-- **Type Definitions** - TypeScript interfaces
-- **Data Layer** - Documentation content and configuration
-
----
-
-## Future Component Enhancements
-
-### Planned Improvements
-1. **Enhanced AI Integration** - More sophisticated suggestion algorithms
-2. **Real-time Collaboration** - Multi-user support components
-3. **Advanced Analytics** - User behavior tracking components
-4. **Accessibility Enhancements** - Improved screen reader support
-
-### Component Library Evolution
-1. **Design System Expansion** - Additional UI components
-2. **Theme Customization** - Advanced theming capabilities
-3. **Animation System** - Coordinated animations and transitions
-4. **Responsive Enhancements** - Better mobile experience components 
+## 12) Review Notes (Component Architecture – Expert Guidance)
+- Keep components dumb, steps smart: Let `integration-flow.json` decide what to render; components should react, not decide.
+- One path to extend: Add a small component and a single mapping entry (either new screen or new inline tag). Avoid sprawling conditionals.
+- Validate inputs: Use a Zod schema for the flow file; fail fast with a friendly error when authors make mistakes.
+- Accessibility first: Preserve keyboard navigation and ARIA attributes on progress and menus as components evolve.
+- Favor composition over flags: When adding variants, prefer composing small components rather than branching with props.
+- Tighten quality gates before scaling: Add minimal tests around `AppContextProvider` navigation and the markdown transform; remove build ignores when stable. 

@@ -7,8 +7,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ChevronDown, ChevronRight, Copy, Check } from 'lucide-react';
 import { JSONTypewriterEffect } from '@/components/ui/json-typewriter-effect';
+import { CartTypewriter } from '@/components/ui/cart-typewriter';
 
-interface APIEndpoint {
+export interface APIEndpoint {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   path: string;
   description?: string;
@@ -16,17 +17,18 @@ interface APIEndpoint {
   responseExample: object;
 }
 
-interface APIDocumentationProps {
+export interface APIDocumentationProps {
   endpoints: APIEndpoint[];
 }
 
 const APIDocumentation: React.FC<APIDocumentationProps> = ({ endpoints }) => {
-  // Initialize collapsed state - only /cart endpoint expanded, all others collapsed
+  // Initialize collapsed state - expand Create Order (/v1/orders) by default
   const [collapsedSections, setCollapsedSections] = useState<Record<number, boolean>>(() => {
     const initialState: Record<number, boolean> = {};
     endpoints.forEach((endpoint, index) => {
-      // Collapse all endpoints except /cart
-      initialState[index] = endpoint.path !== '/cart';
+      // Keep Create Order expanded; collapse others
+      const isCreateOrderEndpoint = endpoint.method === 'POST' && endpoint.path.includes('/v1/orders');
+      initialState[index] = !isCreateOrderEndpoint;
     });
     return initialState;
   });
@@ -105,6 +107,8 @@ const APIDocumentation: React.FC<APIDocumentationProps> = ({ endpoints }) => {
     );
   };
 
+  const isCreateOrder = (endpoint: APIEndpoint) => endpoint.method === 'POST' && endpoint.path.includes('/v1/orders');
+
   return (
     <div className="space-y-6">
       {endpoints.map((endpoint, index) => {
@@ -181,7 +185,9 @@ const APIDocumentation: React.FC<APIDocumentationProps> = ({ endpoints }) => {
                             <Copy className="h-4 w-4 text-gray-500" />
                           )}
                         </Button>
-                        {endpoint.path === '/cart' ? (
+                        {isCreateOrder(endpoint) ? (
+                          <CartTypewriter json={endpoint.requestExample!} />
+                        ) : endpoint.path === '/cart' ? (
                           <JSONTypewriterEffect 
                             jsonObject={endpoint.requestExample} 
                             speed={25}
@@ -208,7 +214,11 @@ const APIDocumentation: React.FC<APIDocumentationProps> = ({ endpoints }) => {
                           <Copy className="h-4 w-4 text-gray-500" />
                         )}
                       </Button>
-                      {renderJSONWithLineNumbers(formatJSON(endpoint.responseExample))}
+                      {isCreateOrder(endpoint) ? (
+                        <CartTypewriter json={endpoint.responseExample} />
+                      ) : (
+                        renderJSONWithLineNumbers(formatJSON(endpoint.responseExample))
+                      )}
                     </div>
                   </TabsContent>
                 </Tabs>

@@ -1,0 +1,106 @@
+{
+  "version": "1.0",
+  "flow": "ios_standard_sdk_integration",
+  "steps": [
+    {
+      "step": 1,
+      "id": "INSTALL_SDK",
+      "title": "Install SDK",
+      "left": {
+        "type": "device",
+        "asset": "/mnt/data/TestDocuProto Frame.png",
+        "alt": "Product page with disabled Buy Now (SDK not wired yet).",
+        "overlays": [
+          { "type": "cta", "label": "Buy Now", "state": "disabled" },
+          { "type": "badge", "text": "Install Razorpay SDK to enable", "position": "cta-top-right" }
+        ]
+      },
+      "right_md": "# 1) Install SDK\n\n**Goal:** Add the SDK to the app project (build-time).\n\n### CocoaPods (recommended)\n<CocoaPodSnippet/>\n\nRun:\n<PodInstallSnippet/>\n\n### Manual (XCFramework)\n1. Download & unzip the SDK.\n2. Xcode → **File → Add Files to “YourApp”** → select **Razorpay.xcframework**.\n3. Check **Copy items if needed**.\n4. Target → **General → Frameworks, Libraries, and Embed Content** → **Embed & Sign**.\n\n### Objective-C projects\n- **Build Settings** → **Always Embed Swift Standard Libraries = YES**.\n\n> **ATS (iOS 9)** — some bank pages (IN) may need:\n<AtsInfoPlistSnippet/>\n\n**Next:** Click **Next** to enable the CTA."
+    },
+    {
+      "step": 2,
+      "id": "INITIALIZE_SDK",
+      "title": "Initialize SDK",
+      "left": {
+        "type": "device",
+        "asset": "/mnt/data/TestDocuProto Frame.png",
+        "alt": "Product page with enabled Buy Now, ready to launch checkout.",
+        "overlays": [
+          { "type": "cta", "label": "Buy Now", "state": "enabled" },
+          { "type": "banner", "text": "Razorpay SDK initialised ✓", "tone": "success" }
+        ]
+      },
+      "right_md": "# 2) Initialize SDK\n\n**Goal:** Wire up the SDK at runtime and set completion delegate.\n\n> Do **not** hardcode keys in production; fetch from your backend.\n\n**Swift**\n<RzpInitSwiftSnippet/>\n\n**Objective-C**\n<RzpInitObjcSnippet/>\n\n**Next:** Tap **Buy Now** (or Next) to create an order."
+    },
+    {
+      "step": 3,
+      "id": "ORDER_CREATING",
+      "title": "Create Order (Server)",
+      "left": {
+        "type": "device",
+        "asset": "/mnt/data/TestDocuProto Frame (2).png",
+        "alt": "Product page dimmed with a spinner overlay while creating an order.",
+        "overlays": [
+          { "type": "spinner", "text": "Creating order…" }
+        ]
+      },
+      "right_md": "# 3) Create Order (Server)\n\n**Goal:** Create an order on your server and return `order_id` to the app.\n\n<APIExample/>\n\nReturn **`order_id`** to the app and cache with your cart/session.\n\n> Idempotency: reuse the same `receipt` when retrying a failed create.\n\n> Next: Use this `order_id` to open checkout."
+    },
+    {
+      "step": 4,
+      "id": "CHECKOUT_OPEN",
+      "title": "Open Checkout (Options, UPI, Theme)",
+      "left": {
+        "type": "device",
+        "asset": "/mnt/data/TestDocuProto Image 24718.png",
+        "alt": "Razorpay Checkout with UPI, Cards, Netbanking, EMI, Wallet options.",
+        "overlays": []
+      },
+      "right_md": "# 4) Open Checkout (Pass Options)\n\n**Goal:** Build the options object and launch the checkout UI.\n\n**Swift**\n<RzpOpenSwiftSnippet/>\n<RzpDisplayControllerSwiftSnippet/>\n\n**Objective-C**\n<RzpOpenObjcSnippet/>\n\n**UPI Intent (IN, optional)**\n- Add supported UPI apps to `LSApplicationQueriesSchemes` in **Info.plist**.\n- Ensure UPI is enabled on your account; still use `order_id` flow.\n\n> Supports 90+ currencies. Amounts are **always in smallest units**."
+    },
+    {
+      "step": 5,
+      "id": "PAYMENT_RESULT",
+      "title": "Handle Callbacks (Success/Error)",
+      "left": {
+        "type": "device",
+        "asset": "/mnt/data/TestDocuProto.png",
+        "alt": "Razorpay payment successful screen with green check.",
+        "overlays": [
+          { "type": "toggle", "label": "Preview error", "simulates": "toast_error" }
+        ]
+      },
+      "right_md": "# 5) Handle Callbacks\n\nChoose one completion protocol.\n\n### `RazorpayPaymentCompletionProtocol`\n**Swift**\n<RzpDelegateSwiftProtocolSnippet/>\n**Objective-C**\n<RzpDelegateObjcProtocolSnippet/>\n\n### `RazorpayPaymentCompletionProtocolWithData`\n<RzpDelegateSwiftWithDataSnippet/>\n<RzpDelegateObjcWithDataSnippet/>\n\nUse when you also want metadata (`response`).\n\n**Failure codes:** `0` network, `1` init/unexpected, `2` user cancelled.\n\n**Next:** Send the result to your server for verification."
+    },
+    {
+      "step": 6,
+      "id": "SERVER_VERIFY",
+      "title": "Server: Store, Verify Signature, Status/Capture",
+      "left": {
+        "type": "panel",
+        "component": "server-console",
+        "alt": "Three-tab server console: Store → Verify Signature → Status/Capture.",
+        "tabs": ["Store", "Verify Signature", "Status/Capture"]
+      },
+      "right_md": "# 6) Server Post-Payment (Secure & Persist)\n\n1. **Store**\n   - `order_id`, `payment__id`, `status`, `signature` (if present), `notes`, and your internal refs.\n2. **Verify signature** (on server, using Key Secret)\n   - If mismatch → treat as failure & alert.\n3. **Confirm status / capture**\n   - Via API polling **or** webhooks. Implement idempotent handlers and verify webhook signatures.\n\n> **Never** expose your Key Secret in the app."
+    },
+    {
+      "step": 7,
+      "id": "GOLIVE_CHECKLIST",
+      "title": "Test & Go-Live",
+      "left": {
+        "type": "panel",
+        "component": "checklist",
+        "alt": "Go-Live checklist panel with checkboxes.",
+        "items": [
+          "Switch to Live keys (app + backend)",
+          "Choose capture mode (auto/manual)",
+          "Configure webhooks in Live; verify signatures",
+          "Run test matrix: success/failure/cancel/timeout",
+          "Monitoring & alerts enabled"
+        ]
+      },
+      "right_md": "# 7) Test → Go-Live\n\n- **Test Mode:** exercise success, failure, cancel, timeout; verify your server signature & status flows.\n- **Keys:** swap to **Live** in app + backend; rotate safely.\n- **Capture:** set Auto or Manual per your business.\n- **Webhooks:** configure in Live, verify signatures, make handlers idempotent.\n- **Ops:** add monitoring/alerts for payment failures & webhook retries.\n\n**Done!** Your iOS integration is production-ready."
+    }
+  ]
+} 

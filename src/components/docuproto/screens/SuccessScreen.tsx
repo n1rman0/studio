@@ -1,12 +1,13 @@
 "use client";
 
-import React from 'react';
-import { Check, Link2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Check, Link2, AlertTriangle } from 'lucide-react';
 import { useAppContext } from '../AppContextProvider';
 
-type PhoneScreenProps = { onRequestNext?: () => void; onRequestBack?: () => void; onRequestGoto?: (id: string) => void };
-const SuccessScreen: React.FC<PhoneScreenProps> = () => {
+ type PhoneScreenProps = { onRequestNext?: () => void; onRequestBack?: () => void; onRequestGoto?: (id: string) => void };
+const SuccessScreen: React.FC<PhoneScreenProps> = ({ onRequestNext }) => {
   const { addInteraction } = useAppContext();
+  const [showError, setShowError] = useState(false);
 
   return (
     <div className="w-full h-full bg-[#0ea15a] relative text-white">
@@ -31,7 +32,7 @@ const SuccessScreen: React.FC<PhoneScreenProps> = () => {
       </div>
 
       {/* Receipt card */}
-      <div className="absolute left-4 right-4 bottom-24 bg-white text-slate-800 rounded-2xl shadow p-4">
+      <div className="absolute left-4 right-4 bottom-28 bg-white text-slate-800 rounded-2xl shadow p-4">
         <div className="flex items-center justify-between">
           <div className="text-[14px] font-semibold">Maven Shop Inc.</div>
           <div className="text-[18px] font-extrabold">₹4149</div>
@@ -45,8 +46,22 @@ const SuccessScreen: React.FC<PhoneScreenProps> = () => {
         </button>
       </div>
 
-      {/* Bottom secured */}
-      <div className="absolute bottom-6 left-0 right-0 text-center text-[11px] opacity-90">Secured by <span className="font-semibold">Razorpay</span></div>
+      {/* Bottom controls */}
+      <div className="absolute bottom-6 left-0 right-0 flex items-center justify-center gap-3">
+        <button onClick={() => setShowError(v => !v)} className="text-[12px] bg-white/10 px-3 py-2 rounded border border-white/20 flex items-center gap-1">
+          <AlertTriangle size={14} /> Toggle Error
+        </button>
+        <button onClick={() => { addInteraction('Continue to server verification'); onRequestNext?.(); }} className="text-[12px] bg-black/30 px-3 py-2 rounded border border-white/20">
+          Continue
+        </button>
+      </div>
+
+      {/* Error toast */}
+      {showError && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black text-white text-[11px] px-3 py-2 rounded shadow">
+          Failure code 1: Initialization failure / Unexpected behaviour
+        </div>
+      )}
     </div>
   );
 };

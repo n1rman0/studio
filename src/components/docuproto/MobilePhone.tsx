@@ -14,9 +14,12 @@ interface MobilePhoneProps {
 	onRequestNext?: () => void;
 	onRequestBack?: () => void;
 	onRequestGoto?: (id: string) => void;
+	buyDisabled?: boolean;
+	lockTooltip?: string;
+	toastText?: string | null;
 }
 
-const MobilePhone: React.FC<MobilePhoneProps> = ({ overlayVisible = false, overlayLabel, screen = 'product', onRequestNext, onRequestBack, onRequestGoto }) => {
+const MobilePhone: React.FC<MobilePhoneProps> = ({ overlayVisible = false, overlayLabel, screen = 'product', onRequestNext, onRequestBack, onRequestGoto, buyDisabled, lockTooltip, toastText }) => {
 	const renderScreen = () => {
 		switch (screen) {
 			case 'checkout':
@@ -24,20 +27,21 @@ const MobilePhone: React.FC<MobilePhoneProps> = ({ overlayVisible = false, overl
 			case 'success':
 				return <SuccessScreen onRequestNext={onRequestNext} onRequestBack={onRequestBack} onRequestGoto={onRequestGoto} />;
 			default:
-				return <ProductDetailScreen onRequestNext={onRequestNext} onRequestBack={onRequestBack} onRequestGoto={onRequestGoto} />;
+				return <ProductDetailScreen onRequestNext={onRequestNext} onRequestBack={onRequestBack} onRequestGoto={onRequestGoto} buyDisabled={buyDisabled} lockTooltip={lockTooltip} />;
 		}
 	};
 
 	return (
-		<div className="w-full h-full pb-12 relative" style={{
-			backgroundImage: `radial-gradient(circle, #d1d5db 1px, transparent 1px)`,
-			backgroundSize: '30px 30px',
-			backgroundColor: '#f9fafb'
-		}}>
+		<div className="relative h-full">
 			<DeviceWrapper>
 				<div className="w-full h-full relative">
 					{renderScreen()}
 					<OverlayLoader visible={overlayVisible} label={overlayLabel} />
+					{toastText && (
+						<div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black text-white text-[11px] px-3 py-2 rounded shadow">
+							{toastText}
+						</div>
+					)}
 				</div>
 			</DeviceWrapper>
 		</div>

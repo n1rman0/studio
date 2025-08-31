@@ -1,0 +1,127 @@
+{
+  "version": "1.0",
+  "flow": "ios_standard_sdk_integration",
+  "steps": [
+    {
+      "step": 1,
+      "id": "INSTALL_SDK",
+      "title": "Install SDK",
+      "left": {
+        "type": "panel",
+        "component": "code-tabs",
+        "alt": "IDE view showing SDK installation for CocoaPods, Manual, and Info.plist ATS settings.",
+        "tabs": [
+          {
+            "title": "Podfile",
+            "language": "ruby",
+            "content": "platform :ios, '12.0'\\nuse_frameworks!\\n\\ntarget 'YourApp' do\\n  pod 'razorpay-pod'\\nend"
+          },
+          {
+            "title": "Xcode (UI)",
+            "language": "text",
+            "content": "1. File → Add Files to “YourApp”\\n2. Select Razorpay.xcframework\\n3. Check “Copy items if needed”\\n4. Target → General → Frameworks, Libraries, and Embed Content → Embed & Sign"
+          },
+          {
+            "title": "Info.plist (ATS)",
+            "language": "xml",
+            "content": "<key>NSAppTransportSecurity</key>\\n<dict>\\n  <key>NSAllowsArbitraryLoads</key>\\n  <true/>\\n</dict>"
+          }
+        ]
+      },
+      "right_md": "# 1) Install SDK\\n\\n**Goal:** Add the Razorpay SDK to your Xcode project.\\n\\nChoose your preferred installation method.\\n\\n### Swift Package Manager (Recommended)\\n*In Xcode, go to **File → Add Packages...** and enter the package URL:*\\n`https://github.com/razorpay/razorpay-pod`\\n\\n### CocoaPods\\n1. Add `pod 'razorpay-pod'` to your `Podfile` (as shown on the left).\\n2. Run `pod install` in your terminal.\\n\\n### Manual Installation\\n1. Download the `Razorpay.xcframework`.\\n2. Follow the steps shown in the **Xcode (UI)** tab on the left to add it to your project.\\n\\n> **Note for Objective-C projects:**\\n> Set `Always Embed Swift Standard Libraries = YES` in your target’s Build Settings.\\n\\n**Next:** Once the SDK is installed, you'll initialize it."
+    },
+    {
+      "step": 2,
+      "id": "INITIALIZE_SDK",
+      "title": "Initialize SDK",
+      "left": {
+        "type": "panel",
+        "component": "code-tabs",
+        "alt": "IDE view showing SDK initialization for Swift and Objective-C.",
+        "tabs": [
+          {
+            "title": "Swift",
+            "language": "swift",
+            "content": "import Razorpay\\n\\n// 1. Conform to the protocol\\nclass CheckoutVC: UIViewController, RazorpayPaymentCompletionProtocol {\\n  var razorpay: RazorpayCheckout!\\n\\n  override func viewDidLoad() {\\n    super.viewDidLoad()\\n    // 2. Initialize the SDK\\n    razorpay = RazorpayCheckout.initWithKey(\\\"YOUR_KEY_ID\\\", andDelegate: self)\\n  }\\n  // ... handle callbacks later\\n}"
+          },
+          {
+            "title": "Objective-C",
+            "language": "objectivec",
+            "content": "#import <Razorpay/Razorpay.h>\\n\\n// 1. Conform to the protocol\\n@interface CheckoutVC () <RazorpayPaymentCompletionProtocol>\\n@end\\n\\n@implementation CheckoutVC {\\n  RazorpayCheckout *razorpay;\\n}\\n- (void)viewDidLoad {\\n  [super viewDidLoad];\\n  // 2. Initialize the SDK\\n  razorpay = [RazorpayCheckout initWithKey:@\\\"YOUR_KEY_ID\\\" andDelegate:self];\\n}\\n// ... handle callbacks later\\n@end"
+          }
+        ]
+      },
+      "right_md": "# 2) Initialize SDK\\n\\n**Goal:** Wire up the SDK at runtime so it’s ready to open checkout.\\n\\n### 1. Get your Key ID\\nGrab your **Test Mode** Key ID from the [Razorpay Dashboard](https://dashboard.razorpay.com/#/app/keys).\\n\\n### 2. Add Initialization Code\\nIn your `UIViewController` that will launch checkout:\\n1.  **Import** the `Razorpay` module.\\n2.  Conform your class to `RazorpayPaymentCompletionProtocol`.\\n3.  In `viewDidLoad`, call `RazorpayCheckout.initWithKey(...)`, passing your Key ID and `self` as the delegate.\\n\\n> **Security Warning**\\n> Do **not** hardcode keys in a production app. Fetch them from your server at runtime.\\n\\n**Next:** Click **Next** to simulate creating an order on your server."
+    },
+    {
+      "step": 3,
+      "id": "ORDER_CREATING",
+      "title": "Create Order (Server)",
+      "left": {
+        "type": "device",
+        "asset": "/mnt/data/TestDocuProto Frame (2).png",
+        "alt": "Product page dimmed with a spinner overlay while creating an order.",
+        "overlays": [
+          { "type": "spinner", "text": "Creating order…" }
+        ]
+      },
+      "right_md": "# 3) Create Order (Server)\n\n**Goal:** Create an order on your server and return `order_id` to the app.\n\n**HTTP**\n```http\nPOST https://api.razorpay.com/v1/orders\nAuthorization: Basic <base64(key_id:key_secret)>\nContent-Type: application/json\n\n{\n  \"amount\": 100,           // smallest units\n  \"currency\": \"INR\",      // MYR / SGD for MY/SG\n  \"receipt\": \"rcpt_11\",\n  \"notes\": {\"source\": \"ios\"}\n}\n```\n**Response**\n```json\n{ \"id\": \"order_DBJOWzybf0sJbb\", \"status\": \"created\" }\n```\nReturn **`order_id`** to the app and cache with your cart/session.\n\n> **Idempotency tip:** reuse the same `receipt` when retrying a failed create.\n\n**Next:** Use this `order_id` to open checkout."
+    },
+    {
+      "step": 4,
+      "id": "CHECKOUT_OPEN",
+      "title": "Open Checkout (Options, UPI, Theme)",
+      "left": {
+        "type": "device",
+        "asset": "/mnt/data/TestDocuProto Image 24718.png",
+        "alt": "Razorpay Checkout with UPI, Cards, Netbanking, EMI, Wallet options.",
+        "overlays": []
+      },
+      "right_md": "# 4) Open Checkout (Pass Options)\n\n**Goal:** Build the options object and launch the checkout UI.\n\n**Swift**\n```swift\nfunc showPaymentForm(orderId: String){\n  let options: [String: Any] = [\n    \"key\": \"YOUR_KEY_ID\",\n    \"amount\": \"100\",              // subunits\n    \"currency\": \"INR\",\n    \"order_id\": orderId,\n    \"name\": \"Your Store\",\n    \"description\": \"Cart payment\",\n    \"image\": \"https://url-to-image.jpg\",\n    \"prefill\": [\"email\": \"dev@example.com\", \"contact\": \"9999999999\"],\n    \"theme\": [\"color\": \"#F37254\"] // HEX only\n  ]\n  razorpay.open(options, displayController: self)\n}\n```\n\n**UPI Intent (IN, optional)**\n- Add supported UPI apps to `LSApplicationQueriesSchemes` in **Info.plist**.\n- Ensure UPI is enabled on your account; still use `order_id` flow.\n\n> Supports 90+ currencies. Amounts are **always in smallest units**."
+    },
+    {
+      "step": 5,
+      "id": "PAYMENT_RESULT",
+      "title": "Handle Callbacks (Success/Error)",
+      "left": {
+        "type": "device",
+        "asset": "/mnt/data/TestDocuProto.png",
+        "alt": "Razorpay payment successful screen with green check.",
+        "overlays": [
+          { "type": "toggle", "label": "Preview error", "simulates": "toast_error" }
+        ]
+      },
+      "right_md": "# 5) Handle Callbacks\n\nChoose one completion protocol.\n\n### `RazorpayPaymentCompletionProtocol`\n**Swift**\n```swift\nextension CheckoutVC: RazorpayPaymentCompletionProtocol {\n  func onPaymentSuccess(_ payment_id: String) { /* show success UI, send to server */ }\n  func onPaymentError(_ code: Int32, description str: String) { /* show error & allow retry */ }\n}\n```\n**Objective-C**\n```objectivec\n- (void)onPaymentSuccess:(NSString *)payment_id { /* success */ }\n- (void)onPaymentError:(int)code description:(NSString *)str { /* error */ }\n```\n\n### `RazorpayPaymentCompletionProtocolWithData`\nUse when you also want metadata (`response`).\n\n**Failure codes:** `0` network, `1` init/unexpected, `2` user cancelled.\n\n**Next:** Send the result to your server for verification."
+    },
+    {
+      "step": 6,
+      "id": "SERVER_VERIFY",
+      "title": "Server: Store, Verify Signature, Status/Capture",
+      "left": {
+        "type": "panel",
+        "component": "server-console",
+        "alt": "Three-tab server console: Store → Verify Signature → Status/Capture.",
+        "tabs": ["Store", "Verify Signature", "Status/Capture"]
+      },
+      "right_md": "# 6) Server Post-Payment (Secure & Persist)\n\n1. **Store**\n   - `order_id`, `payment_id`, `status`, `signature` (if present), `notes`, and your internal refs.\n2. **Verify signature** (on server, using Key Secret)\n   - If mismatch → treat as failure & alert.\n3. **Confirm status / capture**\n   - Via API polling **or** webhooks. Implement idempotent handlers and verify webhook signatures.\n\n> **Never** expose your Key Secret in the app."
+    },
+    {
+      "step": 7,
+      "id": "GOLIVE_CHECKLIST",
+      "title": "Test & Go-Live",
+      "left": {
+        "type": "panel",
+        "component": "checklist",
+        "alt": "Go-Live checklist panel with checkboxes.",
+        "items": [
+          "Switch to Live keys (app + backend)",
+          "Choose capture mode (auto/manual)",
+          "Configure webhooks in Live; verify signatures",
+          "Run test matrix: success/failure/cancel/timeout",
+          "Monitoring & alerts enabled"
+        ]
+      },
+      "right_md": "# 7) Test → Go-Live\n\n- **Test Mode:** exercise success, failure, cancel, timeout; verify your server signature & status flows.\n- **Keys:** swap to **Live** in app + backend; rotate safely.\n- **Capture:** set Auto or Manual per your business.\n- **Webhooks:** configure in Live, verify signatures, make handlers idempotent.\n- **Ops:** add monitoring/alerts for payment failures & webhook retries.\n\n**Done!** Your iOS integration is production-ready."
+    }
+  ]
+}
